@@ -1,286 +1,4 @@
-<!DOCTYPE html>
-<html lang="ckb" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atta TV - Smart TV Player & Admin Dashboard</title>
-    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-        body { background-color: #0d0d0d; color: #fff; overflow: hidden; height: 100vh; }
-
-        /* ============ SCREEN SWITCHER ============ */
-        .screen {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            height: 100vh; width: 100%;
-            overflow: hidden;
-            background: #0d0d0d;
-        }
-        .screen.active { display: flex; }
-
-        /* ============ LOGIN SCREEN ============ */
-        #loginScreen {
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 50% 20%, #10292b 0%, #0d0d0d 70%);
-        }
-        .login-box {
-            width: 360px;
-            background: #181818;
-            border: 1px solid #282828;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-        }
-        .login-box h1 { color: #00adb5; font-size: 22px; margin-bottom: 6px; }
-        .login-box p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
-        .login-box input {
-            width: 100%; padding: 12px 14px; margin-bottom: 12px;
-            border-radius: 6px; border: 2px solid #333; background: #252525;
-            color: #fff; font-size: 15px;
-        }
-        .login-box input.focusable:focus, .login-box input.active-focus {
-            border-color: #00adb5; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.5);
-        }
-        .login-box button.focusable:focus, .login-box button.active-focus {
-            transform: scale(1.02); box-shadow: 0 0 12px rgba(0,173,181,0.7);
-            outline: none;
-        }
-        .btn-login {
-            width: 100%; padding: 12px; background: #00adb5; color: #fff; font-weight: bold;
-            border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 4px;
-        }
-        .login-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; min-height: 16px; }
-        .admin-link {
-            margin-top: 18px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline;
-        }
-        .admin-link.focusable:focus, .admin-link.active-focus { color: #00adb5; outline: none; }
-
-        /* ============ TV PLAYER SCREEN ============ */
-        #tvScreen { height: 100vh; position: relative; }
-        .player-container { position: relative; width: 100%; height: 100vh; background: #000; }
-        .video-js { width: 100% !important; height: 100vh !important; }
-
-        /* Floating controls over the video (list toggle + logout) */
-        .floating-controls { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 25; }
-        .float-btn {
-            background: rgba(24,24,24,0.85); color: #ddd; border: 2px solid transparent; border-radius: 6px;
-            padding: 10px 16px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
-        }
-        .float-btn.focusable:focus, .float-btn.active-focus {
-            border-color: #00adb5; color: #fff; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.7);
-        }
-
-        /* Brief label showing the channel that was just switched to */
-        .now-playing-label {
-            position: absolute; bottom: 70px; right: 20px; background: rgba(0,0,0,0.75); color: #fff;
-            padding: 10px 18px; border-radius: 6px; font-size: 15px; z-index: 25; opacity: 0;
-            transition: opacity 0.4s ease; pointer-events: none;
-            max-width: 60%; word-wrap: break-word; direction: ltr; text-align: right;
-        }
-        .now-playing-label.show { opacity: 1; }
-
-        /* Slide-in channel list overlay (opened with OK / list button) */
-        .channel-overlay {
-            position: absolute; top: 0; right: 0; bottom: 0; width: 380px; max-width: 90%;
-            background: rgba(14,14,14,0.97); border-left: 2px solid #282828; padding: 18px;
-            display: flex; flex-direction: column; transform: translateX(100%);
-            transition: transform 0.25s ease; z-index: 30;
-        }
-        .channel-overlay.open { transform: translateX(0); }
-
-        .overlay-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
-        .filter-tabs { display: flex; gap: 8px; }
-        .tab {
-            padding: 8px 12px; background: #252525; border-radius: 6px; font-size: 12px; color: #ccc;
-            cursor: pointer; border: 2px solid transparent; white-space: nowrap;
-        }
-        .tab.active { background: #00adb5; color: #fff; }
-        .tab.focusable:focus, .tab.active-focus { border-color: #fff; outline: none; }
-
-        .close-list-btn {
-            background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
-            padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
-        }
-        .close-list-btn.focusable:focus, .close-list-btn.active-focus { border-color: #fff; background: #b53d3d; outline: none; }
-
-        .channel-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
-
-        .channel-item {
-            padding: 12px 16px; background: #252525; border-radius: 6px; cursor: pointer;
-            font-size: 15px; color: #ddd; border: 2px solid transparent; transition: all 0.2s ease;
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-        }
-        .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .channel-item.focusable:focus, .channel-item.active-focus {
-            background: #00adb5; color: #fff; border-color: #ffffff;
-            outline: none; box-shadow: 0 0 12px rgba(0, 173, 181, 0.6);
-        }
-        .channel-item.playing { border-right: 5px solid #00ff66; }
-
-        .fav-star { font-size: 17px; color: #555; cursor: pointer; flex-shrink: 0; }
-        .fav-star.active { color: #ffcc00; }
-
-        .move-buttons { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
-        .move-btn {
-            font-size: 11px; color: #888; cursor: pointer; line-height: 1; padding: 2px 5px;
-            background: #1e1e1e; border-radius: 3px;
-        }
-        .move-btn:hover { color: #00adb5; background: #2a2a2a; }
-        .move-btn.disabled { opacity: 0.25; cursor: default; pointer-events: none; }
-
-        .channel-list::-webkit-scrollbar, #adminScreen ::-webkit-scrollbar { width: 6px; }
-        .channel-list::-webkit-scrollbar-thumb, #adminScreen ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-
-        /* ============ ADMIN DASHBOARD SCREEN ============ */
-        #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
-        .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-        .admin-topbar h1 { color: #00adb5; font-size: 20px; }
-
-        .admin-body { display: flex; gap: 18px; flex: 1; min-height: 0; }
-        .admin-form-panel {
-            flex: 1; min-width: 300px; background: #181818; border-radius: 10px; padding: 18px;
-            display: flex; flex-direction: column;
-        }
-        .admin-form-panel h2 { color: #00adb5; font-size: 16px; margin-bottom: 14px; text-align: center; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: #ccc; }
-        .form-group input {
-            width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #333;
-            background: #252525; color: #fff; font-size: 14px;
-        }
-        .form-group input.focusable:focus, .form-group input.active-focus {
-            border-color: #00adb5; outline: none; box-shadow: 0 0 8px rgba(0,173,181,0.6);
-        }
-        .btn-submit {
-            width: 100%; padding: 11px; background: #00adb5; color: #fff; font-weight: bold;
-            border: 2px solid transparent; border-radius: 6px; cursor: pointer; margin-top: 6px; font-size: 14px;
-        }
-        .btn-submit.focusable:focus, .btn-submit.active-focus { border-color: #fff; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.7); }
-
-        .admin-table-panel {
-            flex: 2; min-width: 360px; background: #181818; border-radius: 10px; padding: 18px;
-            display: flex; flex-direction: column; min-height: 0;
-        }
-        .admin-table-panel h2 { color: #00adb5; font-size: 16px; margin-bottom: 12px; }
-        .table-container { flex: 1; overflow-y: auto; border: 1px solid #282828; border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border: 1px solid #282828; padding: 8px; text-align: center; }
-        th { background: #222; color: #00adb5; position: sticky; top: 0; }
-        .status-active { color: #00ff66; font-weight: bold; }
-        .status-expired { color: #ff4d4d; font-weight: bold; }
-        .status-blocked { color: #ffb84d; font-weight: bold; }
-        .row-btn {
-            border: none; border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold;
-            cursor: pointer; color: #fff; margin: 2px;
-        }
-        .btn-block { background: #b53d3d; }
-        .btn-unblock { background: #2e8b57; }
-        .btn-delete { background: #444; }
-        .row-btn.focusable:focus, .row-btn.active-focus { outline: 2px solid #fff; }
-        .empty-row td { color: #888; padding: 20px; }
-    </style>
-</head>
-<body>
-
-    <!-- ================= LOGIN SCREEN ================= -->
-    <div id="loginScreen" class="screen active">
-        <div class="login-box">
-            <h2 style="color:#00adb5; font-size:22px; margin-bottom:6px;">Att.TV</h2>
-            <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
-
-            <input type="text" id="loginUsername" class="focusable" tabindex="0" placeholder="ناوی بەکارهێنەر">
-            <input type="password" id="loginPassword" class="focusable" tabindex="0" placeholder="وشەی نهێنی">
-            <button class="btn-login focusable" tabindex="0" id="btnUserLogin">چوونەژوورەوە</button>
-
-            <div class="login-error" id="loginError"></div>
-
-            <div class="admin-link focusable" tabindex="0" id="adminLoginLink">چوونەژوورەوەی بەڕێوەبەر</div>
-        </div>
-    </div>
-
-    <!-- ================= TV PLAYER SCREEN ================= -->
-    <div id="tvScreen" class="screen">
-        <div class="player-container">
-            <video id="tv-player" class="video-js vjs-default-skin" controls preload="auto">
-                <source src="" type="application/x-mpegURL">
-            </video>
-
-            <div class="floating-controls">
-                <button class="float-btn focusable" tabindex="0" id="btnToggleList">☰ لیستی کەناڵەکان</button>
-                <button class="float-btn focusable" tabindex="0" id="btnTvLogout">چوونەدەرەوە</button>
-            </div>
-
-            <div class="now-playing-label" id="nowPlayingLabel"></div>
-        </div>
-
-        <div class="channel-overlay" id="channelOverlay">
-            <div class="overlay-header">
-                <div class="filter-tabs">
-                    <div class="tab focusable active" tabindex="0" data-filter="all">هەمووی</div>
-                    <div class="tab focusable" tabindex="0" data-filter="fav">★ دڵخوازەکان</div>
-                </div>
-                <button class="close-list-btn focusable" tabindex="0" id="btnCloseList">داخستن ✕</button>
-            </div>
-            <div class="channel-list" id="channelList">
-                <p style="text-align:center; color:#888; margin-top:20px;">تکایە چاوەڕێ بکە...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= ADMIN DASHBOARD SCREEN ================= -->
-    <div id="adminScreen" class="screen">
-        <div class="admin-topbar">
-            <h1>داشبۆردی بەڕێوەبەر - بەڕێوەبردنی بەکارهێنەران</h1>
-            <button class="logout-btn focusable" tabindex="0" id="btnAdminLogout">چوونەدەرەوە</button>
-        </div>
-        <div class="admin-body">
-            <div class="admin-form-panel">
-                <h2>زیادکردنی بەکارهێنەری نوێ</h2>
-                <form id="userForm">
-                    <div class="form-group">
-                        <label>ناوی بەکارهێنەر:</label>
-                        <input type="text" id="newUsername" class="focusable" tabindex="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label>وشەی نهێنی:</label>
-                        <input type="text" id="newPassword" class="focusable" tabindex="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label>کاتی دەستپێکردن:</label>
-                        <input type="date" id="startDate" class="focusable" tabindex="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label>کاتی بەسەرچوون:</label>
-                        <input type="date" id="expireDate" class="focusable" tabindex="0" required>
-                    </div>
-                    <button type="submit" id="btnSave" class="btn-submit focusable" tabindex="0">زیادکردنی بەکارهێنەر</button>
-                </form>
-            </div>
-
-            <div class="admin-table-panel">
-                <h2>بەکارهێنەرە تۆمارکراوەکان</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>بەکارهێنەر</th>
-                                <th>دەستپێک</th>
-                                <th>بەسەرچوون</th>
-                                <th>بارودۆخ</th>
-                                <th>کردار</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
+<script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
     <script>
         const m3uUrl = "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u.m3u";
         const ADMIN_USER = "admin";
@@ -701,154 +419,62 @@
             }, 1200);
         }
 
-        /* ---------- Remote control key map ----------
-           Covers standard Smart TV remote codes across platforms. Different TV
-           browsers (Samsung Tizen, LG webOS, Android TV, generic) report the same
-           physical button differently: some use a legacy numeric e.keyCode, others
-           populate the modern e.key string (e.g. "ColorF0Red", "ChannelUp", "Back").
-           We check both so one button works across brands. */
-        const KEY_ACTIONS = {
-            UP:           { codes: [38],           keys: ['ArrowUp'] },
-            DOWN:         { codes: [40],           keys: ['ArrowDown'] },
-            OK:           { codes: [13],           keys: ['Enter'] },
-            BACK:         { codes: [10009, 461],   keys: ['Back', 'GoBack', 'Backspace'] },
-            EXIT:         { codes: [10182],        keys: ['Exit'] },
-            CH_UP:        { codes: [427],          keys: ['ChannelUp'] },
-            CH_DOWN:      { codes: [428],          keys: ['ChannelDown'] },
-            CH_LIST:      { codes: [447, 458],     keys: ['Guide', 'ChannelList', 'List'] },
-            RED:          { codes: [403],          keys: ['ColorF0Red'] },
-            GREEN:        { codes: [404],          keys: ['ColorF1Green'] },
-            YELLOW:       { codes: [405],          keys: ['ColorF2Yellow'] },
-            BLUE:         { codes: [406],          keys: ['ColorF3Blue'] },
-            PLAY:         { codes: [415],          keys: ['MediaPlay'] },
-            PAUSE:        { codes: [19],           keys: ['MediaPause'] },
-            STOP:         { codes: [413],          keys: ['MediaStop'] },
-            REWIND:       { codes: [412],          keys: ['MediaRewind', 'MediaTrackPrevious', 'MediaSeekBackward'] },
-            FASTFORWARD:  { codes: [417],          keys: ['MediaFastForward', 'MediaTrackNext', 'MediaSeekForward'] }
-        };
-
-        function matchAction(e) {
-            for (const action in KEY_ACTIONS) {
-                const map = KEY_ACTIONS[action];
-                if (map.codes.includes(e.keyCode)) return action;
-                if (e.key && map.keys.includes(e.key)) return action;
-            }
-            return null;
-        }
-
-        function isDigitEvent(e) {
-            if (e.keyCode >= 48 && e.keyCode <= 57) return e.keyCode - 48;
-            if (e.key && /^[0-9]$/.test(e.key)) return parseInt(e.key, 10);
-            return null;
-        }
-
+        /* ---------- Remote key listener ---------- */
         document.addEventListener('keydown', function(e) {
             const tvActive = document.getElementById('tvScreen').classList.contains('active');
-            const listOpen = document.getElementById('channelOverlay').classList.contains('open');
+            const overlayOpen = document.getElementById('channelOverlay').classList.contains('open');
 
-            // Number pad -> direct channel entry (only while watching, list closed)
-            const digit = isDigitEvent(e);
-            if (tvActive && !listOpen && digit !== null) {
-                handleDigitInput(digit);
-                e.preventDefault();
+            // Digit Key Handler (0-9)
+            if (tvActive && e.key >= '0' && e.key <= '9') {
+                handleDigitInput(e.key);
                 return;
             }
 
-            const action = matchAction(e);
-            if (!action) {
-                if (tvActive) {
-                    showNowPlaying('کلیلی نەناسراو -> keyCode: ' + e.keyCode + (e.key ? (' / key: ' + e.key) : ''), 4000);
-                }
-                return;
-            }
-
-            // On the TV screen with the list closed: Up/Down/CH surf channels directly, OK/CH-LIST opens the list
-            if (tvActive && !listOpen) {
-                switch (action) {
-                    case 'UP':
-                    case 'CH_UP':
-                        changeChannel(-1);
-                        e.preventDefault();
-                        return;
-                    case 'DOWN':
-                    case 'CH_DOWN':
-                        changeChannel(1);
-                        e.preventDefault();
-                        return;
-                    case 'OK':
-                    case 'CH_LIST':
-                        toggleChannelList(true);
-                        e.preventDefault();
-                        return;
-                    case 'RED':
-                        toggleFavoriteCurrent();
-                        e.preventDefault();
-                        return;
-                    case 'GREEN':
-                        setFilter('all');
-                        toggleChannelList(true);
-                        e.preventDefault();
-                        return;
-                    case 'YELLOW':
-                        setFilter('fav');
-                        toggleChannelList(true);
-                        e.preventDefault();
-                        return;
-                    case 'PLAY':
-                    case 'PAUSE':
-                        if (player) { if (player.paused()) player.play(); else player.pause(); }
-                        e.preventDefault();
-                        return;
-                    case 'STOP':
-                        if (player) player.pause();
-                        e.preventDefault();
-                        return;
-                    case 'REWIND':
-                        if (player) player.currentTime(Math.max(0, player.currentTime() - 10));
-                        e.preventDefault();
-                        return;
-                    case 'FASTFORWARD':
-                        if (player) player.currentTime(player.currentTime() + 10);
-                        e.preventDefault();
-                        return;
-                    case 'EXIT':
-                        document.getElementById('btnTvLogout').click();
-                        e.preventDefault();
-                        return;
-                }
-                return;
-            }
-
-            // Login / Admin screens, or the channel list overlay open: normal focus navigation
-            switch (action) {
-                case 'UP':
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
                     setFocus(currentIndex - 1);
-                    e.preventDefault();
                     break;
-                case 'DOWN':
+                case 'ArrowDown':
+                    e.preventDefault();
                     setFocus(currentIndex + 1);
-                    e.preventDefault();
                     break;
-                case 'OK':
-                    if (focusableElements[currentIndex]) focusableElements[currentIndex].click();
-                    e.preventDefault();
-                    break;
-                case 'BACK':
-                case 'CH_LIST':
-                case 'EXIT':
-                    if (tvActive && listOpen) {
-                        toggleChannelList(false);
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    if (tvActive && !overlayOpen) {
                         e.preventDefault();
+                        setFocus(currentIndex === 0 ? 1 : 0);
                     }
                     break;
-                case 'PLAY':
-                case 'PAUSE':
-                    if (player) { if (player.paused()) player.play(); else player.pause(); }
+                case 'Enter':
+                    if (tvActive && !overlayOpen && document.activeElement === document.body) {
+                        toggleChannelList(true);
+                    } else if (focusableElements[currentIndex]) {
+                        focusableElements[currentIndex].click();
+                    }
+                    break;
+                case 'Escape':
+                case 'BackSpace':
+                    if (tvActive && overlayOpen) {
+                        e.preventDefault();
+                        toggleChannelList(false);
+                    }
+                    break;
+                case 'ChannelUp':
+                case 'PageUp':
+                    if (tvActive) changeChannel(1);
+                    break;
+                case 'ChannelDown':
+                case 'PageDown':
+                    if (tvActive) changeChannel(-1);
+                    break;
+                case 'F3': // Common TV Yellow button mapping for favorites
+                    if (tvActive) toggleFavoriteCurrent();
                     break;
             }
         });
 
-        /* ---------- Init ---------- */
+        /* ---------- Initialize App ---------- */
         showScreen('loginScreen');
     </script>
 </body>
