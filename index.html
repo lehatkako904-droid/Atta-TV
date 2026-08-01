@@ -23,7 +23,7 @@
             width: 360px; background: #181818; border: 1px solid #282828;
             border-radius: 12px; padding: 30px; text-align: center;
         }
-        .login-box h1 { color: #00adb5; font-size: 22px; margin-bottom: 6px; }
+        .login-box h1 { color: #dad68d; font-size: 22px; margin-bottom: 6px; }
         .login-box p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
         .login-box input {
             width: 100%; padding: 12px 14px; margin-bottom: 12px;
@@ -34,7 +34,7 @@
         .focusable:focus, .active-focus {
             border-color: #00adb5 !important;
             outline: none !important;
-            box-shadow: 0 0 14px rgba(0, 173, 181, 0.8) !important;
+            box-shadow: 0 0 14px rgba(189, 201, 147, 0.8) !important;
             transform: scale(1.02);
             background-color: #00adb5 !important;
             color: #fff !important;
@@ -62,9 +62,9 @@
         }
 
         .now-playing-label {
-            position: absolute; bottom: 70px; right: 20px; background: rgba(0,0,0,0.85); color: #00adb5;
+            position: absolute; bottom: 70px; right: 20px; background: rgba(0, 0, 0, 0); color: #afb740;
             padding: 12px 22px; border-radius: 8px; font-size: 18px; font-weight: bold; z-index: 25; opacity: 0;
-            transition: opacity 0.4s ease; pointer-events: none; border: 1px solid #00adb5;
+            transition: opacity 0.4s ease; pointer-events: none; border: 1px solid #7a7c6c;
         }
         .now-playing-label.show { opacity: 1; }
 
@@ -101,17 +101,17 @@
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
         .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .channel-item.playing { border-right: 5px solid #00ff66; }
+        .channel-item.playing { border-right: 5px solid #bc3535; }
 
         .move-btn {
             background: #181818; color: #00adb5; border: 1px solid #333; border-radius: 4px;
             padding: 8px 10px; font-size: 12px; cursor: pointer; font-weight: bold;
         }
-        .move-btn:hover { background: #00adb5; color: #fff; }
+        .move-btn:hover { background: #2c3031; color: #fff; }
 
         #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
         .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-        .admin-topbar h1 { color: #00adb5; font-size: 20px; }
+        .admin-topbar h1 { color: #67603e; font-size: 20px; }
         .logout-btn {
             background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
             padding: 8px 16px; font-size: 13px; cursor: pointer;
@@ -122,7 +122,7 @@
             flex: 1; min-width: 300px; background: #181818; border-radius: 10px; padding: 18px;
             display: flex; flex-direction: column;
         }
-        .admin-form-panel h2 { color: #00adb5; font-size: 16px; margin-bottom: 14px; text-align: center; }
+        .admin-form-panel h2 { color: #b1a04b; font-size: 16px; margin-bottom: 14px; text-align: center; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: #ccc; }
         .form-group input {
@@ -130,7 +130,7 @@
             background: #252525; color: #fff; font-size: 14px;
         }
         .btn-submit {
-            width: 100%; padding: 11px; background: #00adb5; color: #fff; font-weight: bold;
+            width: 100%; padding: 11px; background: #a6802e; color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; margin-top: 6px; font-size: 14px;
         }
 
@@ -138,11 +138,11 @@
             flex: 2; min-width: 360px; background: #181818; border-radius: 10px; padding: 18px;
             display: flex; flex-direction: column; min-height: 0;
         }
-        .admin-table-panel h2 { color: #00adb5; font-size: 16px; margin-bottom: 12px; }
+        .admin-table-panel h2 { color: #a15559; font-size: 16px; margin-bottom: 12px; }
         .table-container { flex: 1; overflow-y: auto; border: 1px solid #282828; border-radius: 6px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { border: 1px solid #282828; padding: 8px; text-align: center; }
-        th { background: #222; color: #00adb5; position: sticky; top: 0; }
+        th { background: #222; color: #b6b251; position: sticky; top: 0; }
         .status-active { color: #00ff66; font-weight: bold; }
         .status-expired { color: #ff4d4d; font-weight: bold; }
         .status-blocked { color: #ffb84d; font-weight: bold; }
@@ -160,7 +160,7 @@
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen active">
         <div class="login-box">
-            <h1>AttaTVعطا تیڤی</h1>
+            <h1>Atta_tv</h1>
             <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
             <input type="text" id="loginUsername" class="focusable" placeholder="ناوی بەکارهێنەر">
             <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی">
