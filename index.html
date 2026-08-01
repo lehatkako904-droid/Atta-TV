@@ -31,6 +31,14 @@
             color: #fff; font-size: 15px;
         }
         
+        /* شاردنەوەی ستایلی Auto-fill لە کرۆمی تیڤی */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0px 1000px #252525 inset !important;
+            -webkit-text-fill-color: #fff !important;
+        }
+
         .focusable:focus, .active-focus {
             border-color: #00adb5 !important;
             outline: none !important;
@@ -42,6 +50,7 @@
         
         .login-box input.focusable:focus {
             background-color: #252525 !important;
+            color: #fff !important;
         }
 
         .btn-login {
@@ -162,8 +171,9 @@
         <div class="login-box">
             <h1>Atta_tv</h1>
             <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
-            <input type="text" id="loginUsername" class="focusable" placeholder="ناوی بەکارهێنەر">
-            <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی">
+            <!-- زیەکردنی autocomplete و autocorrect بۆ ئەوەی auto-fill ڕەفتاری هەڵە نەکات -->
+            <input type="text" id="loginUsername" class="focusable" placeholder="ناوی بەکارهێنەر" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی" autocomplete="off">
             <button class="btn-login focusable" id="btnUserLogin">چوونەژوورەوە</button>
             <div class="login-error" id="loginError"></div>
             <div class="admin-link focusable" id="adminLoginLink" tabindex="0">چوونەژوورەوەی بەڕێوەبەر</div>
@@ -177,10 +187,10 @@
                 <source src="" type="application/x-mpegURL">
             </video>
 
-           <div class="floating-controls">
-    <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
-</div>
-<button class="float-btn focusable" id="btnTvLogout" style="position:absolute; bottom:20px; left:20px; z-index:25;">چوونەدەرەوە</button>
+            <div class="floating-controls">
+                <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
+            </div>
+            <button class="float-btn focusable" id="btnTvLogout" style="position:absolute; bottom:20px; left:20px; z-index:25;">چوونەدەرەوە</button>
 
             <div class="now-playing-label" id="nowPlayingLabel"></div>
         </div>
@@ -210,11 +220,11 @@
                 <form id="userForm">
                     <div class="form-group">
                         <label>ناوی بەکارهێنەر:</label>
-                        <input type="text" id="newUsername" class="focusable" required>
+                        <input type="text" id="newUsername" class="focusable" autocomplete="off" required>
                     </div>
                     <div class="form-group">
                         <label>وشەی نهێنی:</label>
-                        <input type="text" id="newPassword" class="focusable" required>
+                        <input type="text" id="newPassword" class="focusable" autocomplete="off" required>
                     </div>
                     <div class="form-group">
                         <label>کاتی دەستپێکردن:</label>
@@ -502,7 +512,6 @@
         let newIndex = idx + direction;
         if (newIndex < 0 || newIndex >= channelsData.length) return;
 
-        // Swap channels in array
         let temp = channelsData[idx];
         channelsData[idx] = channelsData[newIndex];
         channelsData[newIndex] = temp;
@@ -512,7 +521,6 @@
 
         renderChannelList();
 
-        // Refocus on moved item
         setTimeout(() => {
             let items = document.querySelectorAll('.channel-item');
             if (items[newIndex]) items[newIndex].focus();
@@ -595,17 +603,39 @@
        ========================================================= */
     document.addEventListener('keydown', function(e) {
         const keyCode = e.keyCode;
+        const activeEl = document.activeElement;
+        
+        // پشکنین کە ئایا بەکارهێنەر ئێستا لە ناو خانەی Input دا دەنووسێت یان نا
+        const isWritingInInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+        // کاتی داگرتنی Backspace / Delete یان دوگمەی گەڕانەوەی ڕیمۆتی Smart TV
+        const isBackKey = keyCode === 8 || keyCode === 461 || keyCode === 10009;
+
+        // ئەگەر بەکارهێنەر لەناو خانەی Input بوو:
+        if (isWritingInInput) {
+            // ئەگەر دوگمەی Delete / Backspace بوو، لێگەڕێ وێبگەڕەکە بە ئاسایی پیت بسڕێتەوە
+            if (isBackKey) {
+                return; // هیچ preventDefault مەکە تا ڕەش بێتەوە
+            }
+            // ئەگەر Enter بوو، ڕێگە بپەڕێنێتەوە بۆ Submit
+            if (keyCode === 13) {
+                return;
+            }
+        }
+
         const listOpen = document.getElementById('channelOverlay').classList.contains('open');
         const isTvActive = document.getElementById('tvScreen').classList.contains('active');
 
         switch (keyCode) {
             case 38: // Arrow Up
+                // ئەگەر لەناو input بیت بە دوگمەی ئاڕاستەی سەرەوە مەپەڕێوە بۆ سەر elementـی تر
+                if (isWritingInInput) return;
+                
                 e.preventDefault();
                 if (isTvActive && !listOpen) {
                     playChannelByIndex(currentPlayIndex - 1);
-                } else if (listOpen && e.shiftKey && document.activeElement.classList.contains('channel-item')) {
-                    // Shift + Up = Move Channel Up
-                    let idx = parseInt(document.activeElement.getAttribute('data-idx'));
+                } else if (listOpen && e.shiftKey && activeEl.classList.contains('channel-item')) {
+                    let idx = parseInt(activeEl.getAttribute('data-idx'));
                     moveChannel(idx, -1);
                 } else if (focusableElements.length > 0) {
                     currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
@@ -614,12 +644,13 @@
                 break;
 
             case 40: // Arrow Down
+                if (isWritingInInput) return;
+
                 e.preventDefault();
                 if (isTvActive && !listOpen) {
                     playChannelByIndex(currentPlayIndex + 1);
-                } else if (listOpen && e.shiftKey && document.activeElement.classList.contains('channel-item')) {
-                    // Shift + Down = Move Channel Down
-                    let idx = parseInt(document.activeElement.getAttribute('data-idx'));
+                } else if (listOpen && e.shiftKey && activeEl.classList.contains('channel-item')) {
+                    let idx = parseInt(activeEl.getAttribute('data-idx'));
                     moveChannel(idx, 1);
                 } else if (focusableElements.length > 0) {
                     currentIndex = (currentIndex + 1) % focusableElements.length;
@@ -629,6 +660,8 @@
 
             case 37: // Arrow Left
             case 39: // Arrow Right
+                if (isWritingInInput) return; // لە ناو input ڕێگە بدە بە فڵێشەکەن لە ناو دەقەکەدا بجوڵێت
+                
                 if (focusableElements.length > 0) {
                     if (keyCode === 37) currentIndex = (currentIndex + 1) % focusableElements.length;
                     else currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
@@ -637,8 +670,8 @@
                 break;
 
             case 13: // Enter / OK
-                if (document.activeElement) {
-                    document.activeElement.click();
+                if (activeEl && !isWritingInInput) {
+                    activeEl.click();
                 }
                 break;
 
@@ -657,9 +690,12 @@
             case 461: // webOS Back
             case 8:   // Backspace
             case 27:  // Escape
-                e.preventDefault();
-                if (listOpen) toggleChannelList(false);
-                else if (isTvActive) toggleChannelList(true);
+                // تەنها کاتێک پێویستە preventDefault بکەین کە لە ناو input نەبێت (چونکە لە تیڤی لیستی کەناڵەکان لادەبات)
+                if (!isWritingInInput) {
+                    e.preventDefault();
+                    if (listOpen) toggleChannelList(false);
+                    else if (isTvActive) toggleChannelList(true);
+                }
                 break;
 
             case 406: // Blue Button / LIST
