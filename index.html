@@ -248,316 +248,317 @@
         </div>
     </div>
 
-    <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
-    <script>
-        // گووگڵ شیتەکە بە تەواوی ڕێکخراوە
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTGOm0L3-10lBlpyp3W7BTFSPWYkOLv1RM-_27GOKDKSo4Rl4ooAG8N8Ese_5tql1F/exec";
-        
-        const rawM3uUrls = [
-            "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u.m3u",
-            "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u"
+<script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
+<script>
+    // لینی نوێی بەستراوەی Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxgg7tupLXz54niN1LMj-uAl3C16fw27JkDNUNEZo29nCxGnnioVJpQQpGrNCx9KjIO/exec";
+    
+    const rawM3uUrls = [
+        "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u.m3u",
+        "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u"
+    ];
+
+    const ADMIN_USER = "admin";
+    const ADMIN_PASS = "admin123";
+
+    let player = null;
+    let focusableElements = [];
+    let currentIndex = 0;
+    let currentUser = null;
+    let cachedUsers = [];
+
+    let channelsData = [];
+    let currentPlayIndex = -1;  
+    let currentFilter = 'all';  
+    let channelsLoaded = false;
+    let nowPlayingTimeout = null;
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        refreshFocusableList();
+    }
+
+    function todayStr() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    /* ---------- Fetch users directly from Google Sheet API ---------- */
+    async function fetchUsersFromSheet() {
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
+            cachedUsers = await res.json();
+            return cachedUsers;
+        } catch (err) {
+            console.error("هەڵە لە ڕاکێشانی بەکارهێنەران:", err);
+            return [];
+        }
+    }
+
+    /* ---------- Viewer login ---------- */
+    document.getElementById('btnUserLogin').onclick = async function() {
+        const uname = document.getElementById('loginUsername').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        const errBox = document.getElementById('loginError');
+        errBox.innerText = 'چاوەڕێ بکە...';
+
+        if (!uname || !pass) {
+            errBox.innerText = 'تکایە ناو و وشەی نهێنی بنووسە.';
+            return;
+        }
+
+        const users = await fetchUsersFromSheet();
+        const found = users.find(u => u.username === uname && u.password === pass);
+
+        if (!found) {
+            errBox.innerText = 'ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.';
+            return;
+        }
+        if (found.blocked) {
+            errBox.innerText = '⛔ ئەم هەژمارە بلۆککراوە لەلایەن بەڕێوەبەرەوە.';
+            return;
+        }
+        if (found.expire < todayStr()) {
+            errBox.innerText = '⏰ ماوەی بەکارهێنانی ئەم هەژمارە بەسەرچووە.';
+            return;
+        }
+
+        errBox.innerText = '';
+        currentUser = found;
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        loadChannelsIfNeeded();
+        showScreen('tvScreen');
+    };
+
+    document.getElementById('btnTvLogout').onclick = function() {
+        currentUser = null;
+        if (player) player.pause();
+        toggleChannelList(false);
+        showScreen('loginScreen');
+    };
+
+    /* ---------- Admin login ---------- */
+    document.getElementById('adminLoginLink').onclick = function() {
+        const u = prompt('ناوی بەکارهێنەری بەڕێوەبەر:');
+        if (u === null) return;
+        const p = prompt('وشەی نهێنی:');
+        if (p === null) return;
+
+        if (u.trim() === ADMIN_USER && p.trim() === ADMIN_PASS) {
+            renderUserTable();
+            showScreen('adminScreen');
+        } else {
+            alert('ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!');
+        }
+    };
+
+    document.getElementById('btnAdminLogout').onclick = function() {
+        showScreen('loginScreen');
+    };
+
+    /* ---------- Admin Actions (Google Sheet backend) ---------- */
+    document.getElementById('userForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSave');
+        btn.innerText = 'خەریکی زەخیرەکردنە...';
+        btn.disabled = true;
+
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value.trim();
+        const start = document.getElementById('startDate').value;
+        const expire = document.getElementById('expireDate').value;
+
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: "addUser", username, password, start, expire })
+        });
+
+        this.reset();
+        btn.innerText = 'زیادکردنی بەکارهێنەر';
+        btn.disabled = false;
+        renderUserTable();
+    };
+
+    async function toggleBlockUser(username) {
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: "toggleBlock", username })
+        });
+        renderUserTable();
+    }
+
+    async function deleteUser(username) {
+        if (!confirm('دڵنیایت لە سڕینەوەی ئەم بەکارهێنەرە؟')) return;
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: "deleteUser", username })
+        });
+        renderUserTable();
+    }
+
+    async function renderUserTable() {
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#00adb5;">خەریکی بارکردنی بەکارهێنەرانە لە Google Sheet...</td></tr>`;
+
+        const users = await fetchUsersFromSheet();
+        const today = todayStr();
+
+        if (users.length === 0) {
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="5">هیچ بەکارهێنەرێک تۆمار نەکراوە.</td></tr>`;
+            refreshFocusableList();
+            return;
+        }
+
+        tbody.innerHTML = users.map(u => {
+            const isExpired = u.expire < today;
+            let statusHtml;
+            if (u.blocked) statusHtml = `<span class="status-blocked">بلۆککراوە</span>`;
+            else if (isExpired) statusHtml = `<span class="status-expired">بەسەرچووە</span>`;
+            else statusHtml = `<span class="status-active">چالاکە</span>`;
+
+            return `
+                <tr>
+                    <td>${u.username}</td>
+                    <td>${u.start || '--'}</td>
+                    <td>${u.expire || '--'}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button class="row-btn focusable ${u.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlockUser('${u.username}')">${u.blocked ? 'لابردنی بلۆک' : 'بلۆککردن'}</button>
+                        <button class="row-btn focusable btn-delete" onclick="deleteUser('${u.username}')">سڕینەوە</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        refreshFocusableList();
+    }
+
+    /* ---------- Channels Fetcher ---------- */
+    async function fetchM3uContent(targetUrl) {
+        const proxies = [
+            (url) => url,
+            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
         ];
 
-        const ADMIN_USER = "admin";
-        const ADMIN_PASS = "admin123";
-
-        let player = null;
-        let focusableElements = [];
-        let currentIndex = 0;
-        let currentUser = null;
-        let cachedUsers = [];
-
-        let channelsData = [];
-        let currentPlayIndex = -1;  
-        let currentFilter = 'all';  
-        let channelsLoaded = false;
-        let nowPlayingTimeout = null;
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            refreshFocusableList();
-        }
-
-        function todayStr() {
-            return new Date().toISOString().split('T')[0];
-        }
-
-        // Fetch users directly from Google Sheet API
-        async function fetchUsersFromSheet() {
+        for (let getUrl of proxies) {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
-                cachedUsers = await res.json();
-                return cachedUsers;
-            } catch (err) {
-                console.error("هەڵە لە ڕاکێشانی بەکارهێنەران:", err);
-                return [];
-            }
-        }
-
-        /* ---------- Viewer login ---------- */
-        document.getElementById('btnUserLogin').onclick = async function() {
-            const uname = document.getElementById('loginUsername').value.trim();
-            const pass = document.getElementById('loginPassword').value.trim();
-            const errBox = document.getElementById('loginError');
-            errBox.innerText = 'چاوەڕێ بکە...';
-
-            if (!uname || !pass) {
-                errBox.innerText = 'تکایە ناو و وشەی نهێنی بنووسە.';
-                return;
-            }
-
-            const users = await fetchUsersFromSheet();
-            const found = users.find(u => u.username === uname && u.password === pass);
-
-            if (!found) {
-                errBox.innerText = 'ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.';
-                return;
-            }
-            if (found.blocked) {
-                errBox.innerText = '⛔ ئەم هەژمارە بلۆککراوە لەلایەن بەڕێوەبەرەوە.';
-                return;
-            }
-            if (found.expire < todayStr()) {
-                errBox.innerText = '⏰ ماوەی بەکارهێنانی ئەم هەژمارە بەسەرچووە.';
-                return;
-            }
-
-            errBox.innerText = '';
-            currentUser = found;
-            document.getElementById('loginUsername').value = '';
-            document.getElementById('loginPassword').value = '';
-            loadChannelsIfNeeded();
-            showScreen('tvScreen');
-        };
-
-        document.getElementById('btnTvLogout').onclick = function() {
-            currentUser = null;
-            if (player) player.pause();
-            toggleChannelList(false);
-            showScreen('loginScreen');
-        };
-
-        /* ---------- Admin login ---------- */
-        document.getElementById('adminLoginLink').onclick = function() {
-            const u = prompt('ناوی بەکارهێنەری بەڕێوەبەر:');
-            if (u === null) return;
-            const p = prompt('وشەی نهێنی:');
-            if (p === null) return;
-
-            if (u.trim() === ADMIN_USER && p.trim() === ADMIN_PASS) {
-                renderUserTable();
-                showScreen('adminScreen');
-            } else {
-                alert('ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە!');
-            }
-        };
-
-        document.getElementById('btnAdminLogout').onclick = function() {
-            showScreen('loginScreen');
-        };
-
-        /* ---------- Admin Actions (Database connected) ---------- */
-        document.getElementById('userForm').onsubmit = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSave');
-            btn.innerText = 'خەریکی زەخیرەکردنە...';
-            btn.disabled = true;
-
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value.trim();
-            const start = document.getElementById('startDate').value;
-            const expire = document.getElementById('expireDate').value;
-
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: "addUser", username, password, start, expire })
-            });
-
-            this.reset();
-            btn.innerText = 'زیادکردنی بەکارهێنەر';
-            btn.disabled = false;
-            renderUserTable();
-        };
-
-        async function toggleBlockUser(username) {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: "toggleBlock", username })
-            });
-            renderUserTable();
-        }
-
-        async function deleteUser(username) {
-            if (!confirm('دڵنیایت لە سڕینەوەی ئەم بەکارهێنەرە؟')) return;
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: "deleteUser", username })
-            });
-            renderUserTable();
-        }
-
-        async function renderUserTable() {
-            const tbody = document.getElementById('userTable');
-            tbody.innerHTML = `<tr><td colspan="5" style="color:#00adb5;">خەریکی بارکردنی بەکارهێنەرانە لە Google Sheet...</td></tr>`;
-
-            const users = await fetchUsersFromSheet();
-            const today = todayStr();
-
-            if (users.length === 0) {
-                tbody.innerHTML = `<tr class="empty-row"><td colspan="5">هیچ بەکارهێنەرێک تۆمار نەکراوە.</td></tr>`;
-                refreshFocusableList();
-                return;
-            }
-
-            tbody.innerHTML = users.map(u => {
-                const isExpired = u.expire < today;
-                let statusHtml;
-                if (u.blocked) statusHtml = `<span class="status-blocked">بلۆککراوە</span>`;
-                else if (isExpired) statusHtml = `<span class="status-expired">بەسەرچووە</span>`;
-                else statusHtml = `<span class="status-active">چالاکە</span>`;
-
-                return `
-                    <tr>
-                        <td>${u.username}</td>
-                        <td>${u.start || '--'}</td>
-                        <td>${u.expire || '--'}</td>
-                        <td>${statusHtml}</td>
-                        <td>
-                            <button class="row-btn focusable ${u.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlockUser('${u.username}')">${u.blocked ? 'لابردنی بلۆک' : 'بلۆککردن'}</button>
-                            <button class="row-btn focusable btn-delete" onclick="deleteUser('${u.username}')">سڕینەوە</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            refreshFocusableList();
-        }
-
-        /* ---------- Channels Fetcher ---------- */
-        async function fetchM3uContent(targetUrl) {
-            const proxies = [
-                (url) => url,
-                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
-            ];
-
-            for (let getUrl of proxies) {
-                try {
-                    const res = await fetch(getUrl(targetUrl));
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.includes('#EXTINF')) return text;
-                    }
-                } catch (e) {}
-            }
-            return null;
-        }
-
-        function parseM3u(data) {
-            const lines = data.split('\n');
-            let currentName = "";
-            channelsData = [];
-
-            lines.forEach(line => {
-                line = line.trim();
-                if (line.startsWith('#EXTINF:')) {
-                    currentName = line.split(',')[1] || "کەناڵی بێ ناو";
-                } else if (line.startsWith('http')) {
-                    channelsData.push({ name: currentName, url: line });
+                const res = await fetch(getUrl(targetUrl));
+                if (res.ok) {
+                    const text = await res.text();
+                    if (text && text.includes('#EXTINF')) return text;
                 }
-            });
+            } catch (e) {}
         }
+        return null;
+    }
 
-        async function loadChannelsIfNeeded() {
-            if (channelsLoaded) { renderChannelList(); return; }
-            if (!player) player = videojs('tv-player');
+    function parseM3u(data) {
+        const lines = data.split('\n');
+        let currentName = "";
+        channelsData = [];
 
-            const listContainer = document.getElementById('channelList');
-            listContainer.innerHTML = `<p style="text-align:center; color:#00adb5; margin-top:20px;">لە حاڵەتی بارکردنی کەناڵەکاندا...</p>`;
-
-            let fetchedData = null;
-            for (let targetUrl of rawM3uUrls) {
-                fetchedData = await fetchM3uContent(targetUrl);
-                if (fetchedData) break;
+        lines.forEach(line => {
+            line = line.trim();
+            if (line.startsWith('#EXTINF:')) {
+                currentName = line.split(',')[1] || "کەناڵی بێ ناو";
+            } else if (line.startsWith('http')) {
+                channelsData.push({ name: currentName, url: line });
             }
+        });
+    }
 
-            if (fetchedData) {
-                parseM3u(fetchedData);
-                channelsLoaded = true;
-                renderChannelList();
-            } else {
-                listContainer.innerHTML = `<p style="color:#ff4d4d; text-align:center; margin-top:20px;">نەتوانرا کەناڵەکان باربکرێن!</p>`;
-            }
+    async function loadChannelsIfNeeded() {
+        if (channelsLoaded) { renderChannelList(); return; }
+        if (!player) player = videojs('tv-player');
+
+        const listContainer = document.getElementById('channelList');
+        listContainer.innerHTML = `<p style="text-align:center; color:#00adb5; margin-top:20px;">لە حاڵەتی بارکردنی کەناڵەکاندا...</p>`;
+
+        let fetchedData = null;
+        for (let targetUrl of rawM3uUrls) {
+            fetchedData = await fetchM3uContent(targetUrl);
+            if (fetchedData) break;
         }
 
-        function renderChannelList() {
-            const listContainer = document.getElementById('channelList');
-            if (channelsData.length === 0) return;
-
-            listContainer.innerHTML = channelsData.map((c, idx) => `
-                <div class="channel-item focusable ${idx === currentPlayIndex ? 'playing' : ''}" tabindex="0" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
-                    <span class="channel-name">${c.name}</span>
-                </div>
-            `).join('');
-
-            refreshFocusableList();
+        if (fetchedData) {
+            parseM3u(fetchedData);
+            channelsLoaded = true;
+            renderChannelList();
+        } else {
+            listContainer.innerHTML = `<p style="color:#ff4d4d; text-align:center; margin-top:20px;">نەتوانرا کەناڵەکان باربکرێن!</p>`;
         }
+    }
 
-        function playChannelByIndex(idx) {
-            if (channelsData.length === 0) return;
-            if (idx < 0) idx = channelsData.length - 1;
-            if (idx >= channelsData.length) idx = 0;
+    function renderChannelList() {
+        const listContainer = document.getElementById('channelList');
+        if (channelsData.length === 0) return;
 
-            currentPlayIndex = idx;
-            const ch = channelsData[idx];
+        listContainer.innerHTML = channelsData.map((c, idx) => `
+            <div class="channel-item focusable ${idx === currentPlayIndex ? 'playing' : ''}" tabindex="0" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
+                <span class="channel-name">${c.name}</span>
+            </div>
+        `).join('');
 
-            player.src({ src: ch.url, type: 'application/x-mpegURL' });
-            player.play();
-            showNowPlaying(ch.name);
+        refreshFocusableList();
+    }
+
+    function playChannelByIndex(idx) {
+        if (channelsData.length === 0) return;
+        if (idx < 0) idx = channelsData.length - 1;
+        if (idx >= channelsData.length) idx = 0;
+
+        currentPlayIndex = idx;
+        const ch = channelsData[idx];
+
+        player.src({ src: ch.url, type: 'application/x-mpegURL' });
+        player.play();
+        showNowPlaying(ch.name);
+    }
+
+    function showNowPlaying(name) {
+        const label = document.getElementById('nowPlayingLabel');
+        label.innerText = name;
+        label.classList.add('show');
+        clearTimeout(nowPlayingTimeout);
+        nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 2500);
+    }
+
+    function toggleChannelList(forceState) {
+        const overlay = document.getElementById('channelOverlay');
+        const shouldOpen = (typeof forceState === 'boolean') ? forceState : !overlay.classList.contains('open');
+        overlay.classList.toggle('open', shouldOpen);
+        refreshFocusableList();
+    }
+
+    document.getElementById('btnToggleList').onclick = function() { toggleChannelList(true); };
+    document.getElementById('btnCloseList').onclick = function() { toggleChannelList(false); };
+
+    function refreshFocusableList() {
+        const tvActive = document.getElementById('tvScreen').classList.contains('active');
+        if (tvActive) {
+            const listOpen = document.getElementById('channelOverlay').classList.contains('open');
+            focusableElements = listOpen
+                ? Array.from(document.querySelectorAll('#channelOverlay .focusable'))
+                : Array.from(document.querySelectorAll('.floating-controls .focusable'));
+        } else {
+            const activeScreen = document.querySelector('.screen.active');
+            if (!activeScreen) return;
+            focusableElements = Array.from(activeScreen.querySelectorAll('.focusable'));
         }
+        currentIndex = 0;
+        if (focusableElements.length > 0) focusableElements[0].focus();
+    }
 
-        function showNowPlaying(name) {
-            const label = document.getElementById('nowPlayingLabel');
-            label.innerText = name;
-            label.classList.add('show');
-            clearTimeout(nowPlayingTimeout);
-            nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 2500);
-        }
-
-        function toggleChannelList(forceState) {
-            const overlay = document.getElementById('channelOverlay');
-            const shouldOpen = (typeof forceState === 'boolean') ? forceState : !overlay.classList.contains('open');
-            overlay.classList.toggle('open', shouldOpen);
-            refreshFocusableList();
-        }
-
-        document.getElementById('btnToggleList').onclick = function() { toggleChannelList(true); };
-        document.getElementById('btnCloseList').onclick = function() { toggleChannelList(false); };
-
-        function refreshFocusableList() {
-            const tvActive = document.getElementById('tvScreen').classList.contains('active');
-            if (tvActive) {
-                const listOpen = document.getElementById('channelOverlay').classList.contains('open');
-                focusableElements = listOpen
-                    ? Array.from(document.querySelectorAll('#channelOverlay .focusable'))
-                    : Array.from(document.querySelectorAll('.floating-controls .focusable'));
-            } else {
-                const activeScreen = document.querySelector('.screen.active');
-                if (!activeScreen) return;
-                focusableElements = Array.from(activeScreen.querySelectorAll('.focusable'));
-            }
-            currentIndex = 0;
-            if (focusableElements.length > 0) focusableElements[0].focus();
-        }
-
-        showScreen('loginScreen');
+    showScreen('loginScreen');
+</script>
     </script>
 </body>
 </html>
