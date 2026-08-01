@@ -9,30 +9,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
         body { background-color: #0d0d0d; color: #fff; overflow: hidden; height: 100vh; }
 
-        /* ============ SCREEN SWITCHER ============ */
         .screen {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            height: 100vh; width: 100%;
-            overflow: hidden;
-            background: #0d0d0d;
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            height: 100vh; width: 100%; overflow: hidden; background: #0d0d0d;
         }
         .screen.active { display: flex; }
 
-        /* ============ LOGIN SCREEN ============ */
         #loginScreen {
-            align-items: center;
-            justify-content: center;
+            align-items: center; justify-content: center;
             background: radial-gradient(circle at 50% 20%, #10292b 0%, #0d0d0d 70%);
         }
         .login-box {
-            width: 360px;
-            background: #181818;
-            border: 1px solid #282828;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
+            width: 360px; background: #181818; border: 1px solid #282828;
+            border-radius: 12px; padding: 30px; text-align: center;
         }
         .login-box h1 { color: #00adb5; font-size: 22px; margin-bottom: 6px; }
         .login-box p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
@@ -45,20 +34,16 @@
             border-color: #00adb5; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.5);
         }
         .login-box button.focusable:focus, .login-box button.active-focus {
-            transform: scale(1.02); box-shadow: 0 0 12px rgba(0,173,181,0.7);
-            outline: none;
+            transform: scale(1.02); box-shadow: 0 0 12px rgba(0,173,181,0.7); outline: none;
         }
         .btn-login {
             width: 100%; padding: 12px; background: #00adb5; color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 4px;
         }
         .login-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; min-height: 16px; }
-        .admin-link {
-            margin-top: 18px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline;
-        }
+        .admin-link { margin-top: 18px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline; }
         .admin-link.focusable:focus, .admin-link.active-focus { color: #00adb5; outline: none; }
 
-        /* ============ TV PLAYER SCREEN ============ */
         #tvScreen { height: 100vh; position: relative; }
         .player-container { position: relative; width: 100%; height: 100vh; background: #000; }
         .video-js { width: 100% !important; height: 100vh !important; }
@@ -119,18 +104,6 @@
         .fav-star { font-size: 17px; color: #555; cursor: pointer; flex-shrink: 0; }
         .fav-star.active { color: #ffcc00; }
 
-        .move-buttons { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
-        .move-btn {
-            font-size: 11px; color: #888; cursor: pointer; line-height: 1; padding: 2px 5px;
-            background: #1e1e1e; border-radius: 3px;
-        }
-        .move-btn:hover { color: #00adb5; background: #2a2a2a; }
-        .move-btn.disabled { opacity: 0.25; cursor: default; pointer-events: none; }
-
-        .channel-list::-webkit-scrollbar, #adminScreen ::-webkit-scrollbar { width: 6px; }
-        .channel-list::-webkit-scrollbar-thumb, #adminScreen ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-
-        /* ============ ADMIN DASHBOARD SCREEN ============ */
         #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
         .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
         .admin-topbar h1 { color: #00adb5; font-size: 20px; }
@@ -159,7 +132,6 @@
             width: 100%; padding: 11px; background: #00adb5; color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; margin-top: 6px; font-size: 14px;
         }
-        .btn-submit.focusable:focus, .btn-submit.active-focus { border-color: #fff; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.7); }
 
         .admin-table-panel {
             flex: 2; min-width: 360px; background: #181818; border-radius: 10px; padding: 18px;
@@ -180,29 +152,24 @@
         .btn-block { background: #b53d3d; }
         .btn-unblock { background: #2e8b57; }
         .btn-delete { background: #444; }
-        .row-btn.focusable:focus, .row-btn.active-focus { outline: 2px solid #fff; }
-        .empty-row td { color: #888; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- ================= LOGIN SCREEN ================= -->
+    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="screen active">
         <div class="login-box">
-            <h1 style="color:#00adb5; font-size:22px; margin-bottom:6px;">ئەتا تیڤی</h1>
+            <h1>ئەتا تیڤی</h1>
             <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
-
-            <input type="text" id="loginUsername" class="focusable" tabindex="0" placeholder="ناوی بەکارهێنەر">
-            <input type="password" id="loginPassword" class="focusable" tabindex="0" placeholder="وشەی نهێنی">
-            <button class="btn-login focusable" tabindex="0" id="btnUserLogin">چوونەژوورەوە</button>
-
+            <input type="text" id="loginUsername" class="focusable" placeholder="ناوی بەکارهێنەر">
+            <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی">
+            <button class="btn-login focusable" id="btnUserLogin">چوونەژوورەوە</button>
             <div class="login-error" id="loginError"></div>
-
-            <div class="admin-link focusable" tabindex="0" id="adminLoginLink">چوونەژوورەوەی بەڕێوەبەر</div>
+            <div class="admin-link focusable" id="adminLoginLink">چوونەژوورەوەی بەڕێوەبەر</div>
         </div>
     </div>
 
-    <!-- ================= TV PLAYER SCREEN ================= -->
+    <!-- TV PLAYER SCREEN -->
     <div id="tvScreen" class="screen">
         <div class="player-container">
             <video id="tv-player" class="video-js vjs-default-skin" controls preload="auto">
@@ -210,8 +177,8 @@
             </video>
 
             <div class="floating-controls">
-                <button class="float-btn focusable" tabindex="0" id="btnToggleList">☰ لیستی کەناڵەکان</button>
-                <button class="float-btn focusable" tabindex="0" id="btnTvLogout">چوونەدەرەوە</button>
+                <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
+                <button class="float-btn focusable" id="btnTvLogout">چوونەدەرەوە</button>
             </div>
 
             <div class="now-playing-label" id="nowPlayingLabel"></div>
@@ -220,10 +187,10 @@
         <div class="channel-overlay" id="channelOverlay">
             <div class="overlay-header">
                 <div class="filter-tabs">
-                    <div class="tab focusable active" tabindex="0" data-filter="all">هەمووی</div>
-                    <div class="tab focusable" tabindex="0" data-filter="fav">★ دڵخوازەکان</div>
+                    <div class="tab focusable active" data-filter="all">هەمووی</div>
+                    <div class="tab focusable" data-filter="fav">★ دڵخوازەکان</div>
                 </div>
-                <button class="close-list-btn focusable" tabindex="0" id="btnCloseList">داخستن ✕</button>
+                <button class="close-list-btn focusable" id="btnCloseList">داخستن ✕</button>
             </div>
             <div class="channel-list" id="channelList">
                 <p style="text-align:center; color:#888; margin-top:20px;">تکایە چاوەڕێ بکە...</p>
@@ -231,11 +198,11 @@
         </div>
     </div>
 
-    <!-- ================= ADMIN DASHBOARD SCREEN ================= -->
+    <!-- ADMIN DASHBOARD SCREEN -->
     <div id="adminScreen" class="screen">
         <div class="admin-topbar">
             <h1>داشبۆردی بەڕێوەبەر - بەڕێوەبردنی بەکارهێنەران</h1>
-            <button class="logout-btn focusable" tabindex="0" id="btnAdminLogout">چوونەدەرەوە</button>
+            <button class="logout-btn focusable" id="btnAdminLogout">چوونەدەرەوە</button>
         </div>
         <div class="admin-body">
             <div class="admin-form-panel">
@@ -243,26 +210,26 @@
                 <form id="userForm">
                     <div class="form-group">
                         <label>ناوی بەکارهێنەر:</label>
-                        <input type="text" id="newUsername" class="focusable" tabindex="0" required>
+                        <input type="text" id="newUsername" class="focusable" required>
                     </div>
                     <div class="form-group">
                         <label>وشەی نهێنی:</label>
-                        <input type="text" id="newPassword" class="focusable" tabindex="0" required>
+                        <input type="text" id="newPassword" class="focusable" required>
                     </div>
                     <div class="form-group">
                         <label>کاتی دەستپێکردن:</label>
-                        <input type="date" id="startDate" class="focusable" tabindex="0" required>
+                        <input type="date" id="startDate" class="focusable" required>
                     </div>
                     <div class="form-group">
                         <label>کاتی بەسەرچوون:</label>
-                        <input type="date" id="expireDate" class="focusable" tabindex="0" required>
+                        <input type="date" id="expireDate" class="focusable" required>
                     </div>
-                    <button type="submit" id="btnSave" class="btn-submit focusable" tabindex="0">زیادکردنی بەکارهێنەر</button>
+                    <button type="submit" id="btnSave" class="btn-submit focusable">زیادکردنی بەکارهێنەر</button>
                 </form>
             </div>
 
             <div class="admin-table-panel">
-                <h2>بەکارهێنەرە تۆمارکراوەکان</h2>
+                <h2>بەکارهێنەرە تۆمارکراوەکان (Google Sheet)</h2>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -283,12 +250,12 @@
 
     <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
     <script>
-        // لینکە سەرەکییەکانی Raw M3U
+        // گووگڵ شیتەکە بە تەواوی ڕێکخراوە
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTGOm0L3-10lBlpyp3W7BTFSPWYkOLv1RM-_27GOKDKSo4Rl4ooAG8N8Ese_5tql1F/exec";
+        
         const rawM3uUrls = [
             "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u.m3u",
-            "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u",
-            "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u.m3u",
-            "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u"
+            "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u"
         ];
 
         const ADMIN_USER = "admin";
@@ -298,44 +265,49 @@
         let focusableElements = [];
         let currentIndex = 0;
         let currentUser = null;
+        let cachedUsers = [];
 
-        let channelsData = [];      // [{name, url}]
+        let channelsData = [];
         let currentPlayIndex = -1;  
         let currentFilter = 'all';  
         let channelsLoaded = false;
         let nowPlayingTimeout = null;
 
-        /* ---------- Screen switching ---------- */
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             refreshFocusableList();
         }
 
-        /* ---------- User data helpers ---------- */
-        function getUsers() {
-            return JSON.parse(localStorage.getItem('tv_users') || '[]');
-        }
-        function saveUsers(users) {
-            localStorage.setItem('tv_users', JSON.stringify(users));
-        }
         function todayStr() {
             return new Date().toISOString().split('T')[0];
         }
 
+        // Fetch users directly from Google Sheet API
+        async function fetchUsersFromSheet() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
+                cachedUsers = await res.json();
+                return cachedUsers;
+            } catch (err) {
+                console.error("هەڵە لە ڕاکێشانی بەکارهێنەران:", err);
+                return [];
+            }
+        }
+
         /* ---------- Viewer login ---------- */
-        document.getElementById('btnUserLogin').onclick = function() {
+        document.getElementById('btnUserLogin').onclick = async function() {
             const uname = document.getElementById('loginUsername').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
             const errBox = document.getElementById('loginError');
-            errBox.innerText = '';
+            errBox.innerText = 'چاوەڕێ بکە...';
 
             if (!uname || !pass) {
                 errBox.innerText = 'تکایە ناو و وشەی نهێنی بنووسە.';
                 return;
             }
 
-            const users = getUsers();
+            const users = await fetchUsersFromSheet();
             const found = users.find(u => u.username === uname && u.password === pass);
 
             if (!found) {
@@ -351,6 +323,7 @@
                 return;
             }
 
+            errBox.innerText = '';
             currentUser = found;
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
@@ -384,45 +357,57 @@
             showScreen('loginScreen');
         };
 
-        /* ---------- Admin: add / block / delete users ---------- */
-        document.getElementById('userForm').onsubmit = function(e) {
+        /* ---------- Admin Actions (Database connected) ---------- */
+        document.getElementById('userForm').onsubmit = async function(e) {
             e.preventDefault();
+            const btn = document.getElementById('btnSave');
+            btn.innerText = 'خەریکی زەخیرەکردنە...';
+            btn.disabled = true;
+
             const username = document.getElementById('newUsername').value.trim();
             const password = document.getElementById('newPassword').value.trim();
             const start = document.getElementById('startDate').value;
             const expire = document.getElementById('expireDate').value;
 
-            const users = getUsers();
-            if (users.some(u => u.username === username)) {
-                alert('ئەم ناوی بەکارهێنەرە پێشتر بوونی هەیە!');
-                return;
-            }
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "addUser", username, password, start, expire })
+            });
 
-            users.push({ username, password, start, expire, blocked: false });
-            saveUsers(users);
             this.reset();
+            btn.innerText = 'زیادکردنی بەکارهێنەر';
+            btn.disabled = false;
             renderUserTable();
         };
 
-        function toggleBlockUser(username) {
-            const users = getUsers().map(u => {
-                if (u.username === username) return { ...u, blocked: !u.blocked };
-                return u;
+        async function toggleBlockUser(username) {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "toggleBlock", username })
             });
-            saveUsers(users);
             renderUserTable();
         }
 
-        function deleteUser(username) {
+        async function deleteUser(username) {
             if (!confirm('دڵنیایت لە سڕینەوەی ئەم بەکارهێنەرە؟')) return;
-            const users = getUsers().filter(u => u.username !== username);
-            saveUsers(users);
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: "deleteUser", username })
+            });
             renderUserTable();
         }
 
-        function renderUserTable() {
-            const users = getUsers();
+        async function renderUserTable() {
             const tbody = document.getElementById('userTable');
+            tbody.innerHTML = `<tr><td colspan="5" style="color:#00adb5;">خەریکی بارکردنی بەکارهێنەرانە لە Google Sheet...</td></tr>`;
+
+            const users = await fetchUsersFromSheet();
             const today = todayStr();
 
             if (users.length === 0) {
@@ -445,8 +430,8 @@
                         <td>${u.expire || '--'}</td>
                         <td>${statusHtml}</td>
                         <td>
-                            <button class="row-btn focusable ${u.blocked ? 'btn-unblock' : 'btn-block'}" tabindex="0" onclick="toggleBlockUser('${u.username}')">${u.blocked ? 'لابردنی بلۆک' : 'بلۆککردن'}</button>
-                            <button class="row-btn focusable btn-delete" tabindex="0" onclick="deleteUser('${u.username}')">سڕینەوە</button>
+                            <button class="row-btn focusable ${u.blocked ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlockUser('${u.username}')">${u.blocked ? 'لابردنی بلۆک' : 'بلۆککردن'}</button>
+                            <button class="row-btn focusable btn-delete" onclick="deleteUser('${u.username}')">سڕینەوە</button>
                         </td>
                     </tr>
                 `;
@@ -455,76 +440,22 @@
             refreshFocusableList();
         }
 
-        /* ---------- Favorites ---------- */
-        function getFavorites() {
-            return JSON.parse(localStorage.getItem('tv_favorites') || '[]');
-        }
-        function saveFavorites(arr) {
-            localStorage.setItem('tv_favorites', JSON.stringify(arr));
-        }
-        function isFavorite(url) {
-            return getFavorites().includes(url);
-        }
-        function toggleFavorite(url) {
-            let favs = getFavorites();
-            if (favs.includes(url)) favs = favs.filter(u => u !== url);
-            else favs.push(url);
-            saveFavorites(favs);
-        }
-
-        /* ---------- Custom channel order ---------- */
-        function getSavedOrder() {
-            return JSON.parse(localStorage.getItem('tv_channel_order') || '[]');
-        }
-        function saveChannelOrder() {
-            localStorage.setItem('tv_channel_order', JSON.stringify(channelsData.map(c => c.url)));
-        }
-        function applySavedOrder() {
-            const order = getSavedOrder();
-            if (order.length === 0) return;
-            const orderIndex = new Map(order.map((u, i) => [u, i]));
-            channelsData.sort((a, b) => {
-                const ai = orderIndex.has(a.url) ? orderIndex.get(a.url) : Infinity;
-                const bi = orderIndex.has(b.url) ? orderIndex.get(b.url) : Infinity;
-                return ai - bi;
-            });
-        }
-        function moveChannel(idx, direction) {
-            const targetIdx = idx + direction;
-            if (targetIdx < 0 || targetIdx >= channelsData.length) return;
-
-            const temp = channelsData[idx];
-            channelsData[idx] = channelsData[targetIdx];
-            channelsData[targetIdx] = temp;
-
-            if (currentPlayIndex === idx) currentPlayIndex = targetIdx;
-            else if (currentPlayIndex === targetIdx) currentPlayIndex = idx;
-
-            saveChannelOrder();
-            renderChannelList();
-        }
-
-        /* ---------- Channels Fetcher (Robust Anti-CORS) ---------- */
+        /* ---------- Channels Fetcher ---------- */
         async function fetchM3uContent(targetUrl) {
             const proxies = [
-                (url) => url, // ڕاستەوخۆ
+                (url) => url,
                 (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
                 (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`
             ];
 
             for (let getUrl of proxies) {
                 try {
-                    const finalUrl = getUrl(targetUrl);
-                    const res = await fetch(finalUrl);
+                    const res = await fetch(getUrl(targetUrl));
                     if (res.ok) {
                         const text = await res.text();
-                        if (text && text.includes('#EXTINF')) {
-                            return text;
-                        }
+                        if (text && text.includes('#EXTINF')) return text;
                     }
-                } catch (e) {
-                    console.warn("هەڵە لە ڕاکێشان لە لینک:", targetUrl);
-                }
+                } catch (e) {}
             }
             return null;
         }
@@ -560,92 +491,24 @@
             if (fetchedData) {
                 parseM3u(fetchedData);
                 channelsLoaded = true;
-                applySavedOrder();
                 renderChannelList();
             } else {
-                listContainer.innerHTML = `<p style="color:#ff4d4d; text-align:center; margin-top:20px;">نەتوانرا کەناڵەکان باربکرێن! لە لینکەکان دڵنیا ببەوە.</p>`;
+                listContainer.innerHTML = `<p style="color:#ff4d4d; text-align:center; margin-top:20px;">نەتوانرا کەناڵەکان باربکرێن!</p>`;
             }
         }
 
         function renderChannelList() {
             const listContainer = document.getElementById('channelList');
-            const favs = getFavorites();
-            const items = channelsData
-                .map((c, idx) => ({ ...c, idx }))
-                .filter(c => currentFilter === 'fav' ? favs.includes(c.url) : true);
+            if (channelsData.length === 0) return;
 
-            if (items.length === 0) {
-                listContainer.innerHTML = currentFilter === 'fav'
-                    ? '<p style="text-align:center; color:#888; margin-top:20px;">هیچ کەناڵی دڵخوازت نییە. ئەستێرەکە کلیک بکە بۆ زیادکردن.</p>'
-                    : '<p style="text-align:center; color:#888; margin-top:20px;">هیچ کەناڵێک نەدۆزرایەوە.</p>';
-                refreshFocusableList();
-                return;
-            }
-
-            listContainer.innerHTML = items.map((c) => {
-                const fav = favs.includes(c.url);
-                const playingClass = c.idx === currentPlayIndex ? 'playing' : '';
-                const canReorder = currentFilter === 'all';
-                const isFirst = c.idx === 0;
-                const isLast = c.idx === channelsData.length - 1;
-
-                const moveButtonsHtml = canReorder ? `
-                    <span class="move-buttons">
-                        <span class="move-btn ${isFirst ? 'disabled' : ''}" data-action="up" data-index="${c.idx}">▲</span>
-                        <span class="move-btn ${isLast ? 'disabled' : ''}" data-action="down" data-index="${c.idx}">▼</span>
-                    </span>
-                ` : '';
-
-                return `
-                    <div class="channel-item focusable ${playingClass}" tabindex="0" data-index="${c.idx}">
-                        <span class="channel-name">${c.name}</span>
-                        ${moveButtonsHtml}
-                        <span class="fav-star ${fav ? 'active' : ''}" data-url="${c.url.replace(/"/g, '&quot;')}">★</span>
-                    </div>
-                `;
-            }).join('');
-
-            listContainer.querySelectorAll('.move-btn').forEach(btn => {
-                btn.onclick = function(ev) {
-                    ev.stopPropagation();
-                    if (this.classList.contains('disabled')) return;
-                    const idx = parseInt(this.dataset.index, 10);
-                    const direction = this.dataset.action === 'up' ? -1 : 1;
-                    moveChannel(idx, direction);
-                };
-            });
-
-            listContainer.querySelectorAll('.channel-item').forEach(el => {
-                el.onclick = function(ev) {
-                    if (ev.target.classList.contains('fav-star')) return;
-                    const idx = parseInt(this.dataset.index, 10);
-                    playChannelByIndex(idx);
-                    toggleChannelList(false);
-                };
-            });
-
-            listContainer.querySelectorAll('.fav-star').forEach(star => {
-                star.onclick = function(ev) {
-                    ev.stopPropagation();
-                    toggleFavorite(this.dataset.url);
-                    renderChannelList();
-                };
-            });
+            listContainer.innerHTML = channelsData.map((c, idx) => `
+                <div class="channel-item focusable ${idx === currentPlayIndex ? 'playing' : ''}" tabindex="0" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
+                    <span class="channel-name">${c.name}</span>
+                </div>
+            `).join('');
 
             refreshFocusableList();
         }
-
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.filter === filter);
-            });
-            renderChannelList();
-        }
-
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.onclick = function() { setFilter(this.dataset.filter); };
-        });
 
         function playChannelByIndex(idx) {
             if (channelsData.length === 0) return;
@@ -658,16 +521,6 @@
             player.src({ src: ch.url, type: 'application/x-mpegURL' });
             player.play();
             showNowPlaying(ch.name);
-
-            document.querySelectorAll('.channel-item').forEach(el => el.classList.remove('playing'));
-            const activeEl = document.querySelector(`.channel-item[data-index="${idx}"]`);
-            if (activeEl) activeEl.classList.add('playing');
-        }
-
-        function changeChannel(direction) {
-            if (channelsData.length === 0) return;
-            const startIdx = currentPlayIndex === -1 ? 0 : currentPlayIndex + direction;
-            playChannelByIndex(startIdx);
         }
 
         function showNowPlaying(name) {
@@ -678,7 +531,6 @@
             nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 2500);
         }
 
-        /* ---------- Channel list overlay toggle ---------- */
         function toggleChannelList(forceState) {
             const overlay = document.getElementById('channelOverlay');
             const shouldOpen = (typeof forceState === 'boolean') ? forceState : !overlay.classList.contains('open');
@@ -689,10 +541,8 @@
         document.getElementById('btnToggleList').onclick = function() { toggleChannelList(true); };
         document.getElementById('btnCloseList').onclick = function() { toggleChannelList(false); };
 
-        /* ---------- Focus management (Smart TV Remote) ---------- */
         function refreshFocusableList() {
             const tvActive = document.getElementById('tvScreen').classList.contains('active');
-
             if (tvActive) {
                 const listOpen = document.getElementById('channelOverlay').classList.contains('open');
                 focusableElements = listOpen
@@ -703,104 +553,10 @@
                 if (!activeScreen) return;
                 focusableElements = Array.from(activeScreen.querySelectorAll('.focusable'));
             }
-
             currentIndex = 0;
-            if (focusableElements.length > 0) setFocus(0);
+            if (focusableElements.length > 0) focusableElements[0].focus();
         }
 
-        function setFocus(index) {
-            if (focusableElements.length === 0) return;
-            if (index < 0) index = 0;
-            if (index >= focusableElements.length) index = focusableElements.length - 1;
-            currentIndex = index;
-            focusableElements[currentIndex].focus();
-            focusableElements[currentIndex].scrollIntoView({ block: 'nearest' });
-        }
-
-        function toggleFavoriteCurrent() {
-            if (currentPlayIndex === -1 || !channelsData[currentPlayIndex]) return;
-            const ch = channelsData[currentPlayIndex];
-            toggleFavorite(ch.url);
-            const nowFav = isFavorite(ch.url);
-            showNowPlaying((nowFav ? '★ زیادکرا بۆ دڵخوازەکان: ' : 'لابرا لە دڵخوازەکان: ') + ch.name);
-        }
-
-        let digitBuffer = '';
-        let digitTimeout = null;
-        function handleDigitInput(digit) {
-            digitBuffer += String(digit);
-            showNowPlaying('کەناڵ: ' + digitBuffer);
-            clearTimeout(digitTimeout);
-            digitTimeout = setTimeout(() => {
-                const num = parseInt(digitBuffer, 10);
-                digitBuffer = '';
-                if (!isNaN(num) && num >= 1 && num <= channelsData.length) {
-                    playChannelByIndex(num - 1);
-                }
-            }, 1200);
-        }
-
-        /* ---------- Remote Control Key Mapping ---------- */
-        document.addEventListener('keydown', function(e) {
-            const tvActive = document.getElementById('tvScreen').classList.contains('active');
-            const overlayOpen = document.getElementById('channelOverlay').classList.contains('open');
-
-            // دگمەکانی ژمارە (0-9)
-            if (e.keyCode >= 48 && e.keyCode <= 57) {
-                if (tvActive) handleDigitInput(e.keyCode - 48);
-                return;
-            }
-            if (e.keyCode >= 96 && e.keyCode <= 105) {
-                if (tvActive) handleDigitInput(e.keyCode - 96);
-                return;
-            }
-
-            switch(e.keyCode) {
-                case 38: // ArrowUp
-                    if (tvActive && !overlayOpen) {
-                        changeChannel(-1);
-                    } else {
-                        setFocus(currentIndex - 1);
-                    }
-                    e.preventDefault();
-                    break;
-                case 40: // ArrowDown
-                    if (tvActive && !overlayOpen) {
-                        changeChannel(1);
-                    } else {
-                        setFocus(currentIndex + 1);
-                    }
-                    e.preventDefault();
-                    break;
-                case 37: // ArrowLeft
-                case 39: // ArrowRight
-                    if (!tvActive || overlayOpen) {
-                        const dir = (e.keyCode === 37) ? 1 : -1;
-                        setFocus(currentIndex + dir);
-                    }
-                    e.preventDefault();
-                    break;
-                case 13: // Enter / OK
-                    if (document.activeElement) document.activeElement.click();
-                    break;
-                case 27: // ESC / Back
-                case 10009: // Tizen Return
-                case 461: // WebOS Back
-                    if (tvActive && overlayOpen) {
-                        toggleChannelList(false);
-                        e.preventDefault();
-                    }
-                    break;
-                case 33: // ChannelUp
-                    if (tvActive) changeChannel(-1);
-                    break;
-                case 34: // ChannelDown
-                    if (tvActive) changeChannel(1);
-                    break;
-            }
-        });
-
-        // دەستپێکردنی بەرنامەکە
         showScreen('loginScreen');
     </script>
 </body>
