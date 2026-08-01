@@ -30,19 +30,26 @@
             border-radius: 6px; border: 2px solid #333; background: #252525;
             color: #fff; font-size: 15px;
         }
-        .login-box input.focusable:focus, .login-box input.active-focus {
-            border-color: #00adb5; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.5);
+        
+        .focusable:focus, .active-focus {
+            border-color: #00adb5 !important;
+            outline: none !important;
+            box-shadow: 0 0 14px rgba(0, 173, 181, 0.8) !important;
+            transform: scale(1.02);
+            background-color: #00adb5 !important;
+            color: #fff !important;
         }
-        .login-box button.focusable:focus, .login-box button.active-focus {
-            transform: scale(1.02); box-shadow: 0 0 12px rgba(0,173,181,0.7); outline: none;
+        
+        .login-box input.focusable:focus {
+            background-color: #252525 !important;
         }
+
         .btn-login {
             width: 100%; padding: 12px; background: #00adb5; color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 4px;
         }
         .login-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; min-height: 16px; }
         .admin-link { margin-top: 18px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline; }
-        .admin-link.focusable:focus, .admin-link.active-focus { color: #00adb5; outline: none; }
 
         #tvScreen { height: 100vh; position: relative; }
         .player-container { position: relative; width: 100%; height: 100vh; background: #000; }
@@ -53,19 +60,16 @@
             background: rgba(24,24,24,0.85); color: #ddd; border: 2px solid transparent; border-radius: 6px;
             padding: 10px 16px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
         }
-        .float-btn.focusable:focus, .float-btn.active-focus {
-            border-color: #00adb5; color: #fff; outline: none; box-shadow: 0 0 10px rgba(0,173,181,0.7);
-        }
 
         .now-playing-label {
-            position: absolute; bottom: 70px; right: 20px; background: rgba(0,0,0,0.75); color: #fff;
-            padding: 10px 18px; border-radius: 6px; font-size: 15px; z-index: 25; opacity: 0;
-            transition: opacity 0.4s ease; pointer-events: none;
+            position: absolute; bottom: 70px; right: 20px; background: rgba(0,0,0,0.85); color: #00adb5;
+            padding: 12px 22px; border-radius: 8px; font-size: 18px; font-weight: bold; z-index: 25; opacity: 0;
+            transition: opacity 0.4s ease; pointer-events: none; border: 1px solid #00adb5;
         }
         .now-playing-label.show { opacity: 1; }
 
         .channel-overlay {
-            position: absolute; top: 0; right: 0; bottom: 0; width: 380px; max-width: 90%;
+            position: absolute; top: 0; right: 0; bottom: 0; width: 420px; max-width: 90%;
             background: rgba(14,14,14,0.97); border-left: 2px solid #282828; padding: 18px;
             display: flex; flex-direction: column; transform: translateX(100%);
             transition: transform 0.25s ease; z-index: 30;
@@ -79,30 +83,31 @@
             cursor: pointer; border: 2px solid transparent; white-space: nowrap;
         }
         .tab.active { background: #00adb5; color: #fff; }
-        .tab.focusable:focus, .tab.active-focus { border-color: #fff; outline: none; }
 
         .close-list-btn {
             background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
             padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
         }
-        .close-list-btn.focusable:focus, .close-list-btn.active-focus { border-color: #fff; background: #b53d3d; outline: none; }
 
         .channel-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
 
+        .channel-item-row {
+            display: flex; align-items: center; gap: 6px; width: 100%;
+        }
+
         .channel-item {
-            padding: 12px 16px; background: #252525; border-radius: 6px; cursor: pointer;
-            font-size: 15px; color: #ddd; border: 2px solid transparent; transition: all 0.2s ease;
+            flex: 1; padding: 12px 14px; background: #252525; border-radius: 6px; cursor: pointer;
+            font-size: 14px; color: #ddd; border: 2px solid transparent; transition: all 0.2s ease;
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
         .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .channel-item.focusable:focus, .channel-item.active-focus {
-            background: #00adb5; color: #fff; border-color: #ffffff;
-            outline: none; box-shadow: 0 0 12px rgba(0, 173, 181, 0.6);
-        }
         .channel-item.playing { border-right: 5px solid #00ff66; }
 
-        .fav-star { font-size: 17px; color: #555; cursor: pointer; flex-shrink: 0; }
-        .fav-star.active { color: #ffcc00; }
+        .move-btn {
+            background: #181818; color: #00adb5; border: 1px solid #333; border-radius: 4px;
+            padding: 8px 10px; font-size: 12px; cursor: pointer; font-weight: bold;
+        }
+        .move-btn:hover { background: #00adb5; color: #fff; }
 
         #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
         .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -111,7 +116,6 @@
             background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
             padding: 8px 16px; font-size: 13px; cursor: pointer;
         }
-        .logout-btn.focusable:focus, .logout-btn.active-focus { border-color: #00adb5; outline: none; }
 
         .admin-body { display: flex; gap: 18px; flex: 1; min-height: 0; }
         .admin-form-panel {
@@ -124,9 +128,6 @@
         .form-group input {
             width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #333;
             background: #252525; color: #fff; font-size: 14px;
-        }
-        .form-group input.focusable:focus, .form-group input.active-focus {
-            border-color: #00adb5; outline: none; box-shadow: 0 0 8px rgba(0,173,181,0.6);
         }
         .btn-submit {
             width: 100%; padding: 11px; background: #00adb5; color: #fff; font-weight: bold;
@@ -165,7 +166,7 @@
             <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی">
             <button class="btn-login focusable" id="btnUserLogin">چوونەژوورەوە</button>
             <div class="login-error" id="loginError"></div>
-            <div class="admin-link focusable" id="adminLoginLink">چوونەژوورەوەی بەڕێوەبەر</div>
+            <div class="admin-link focusable" id="adminLoginLink" tabindex="0">چوونەژوورەوەی بەڕێوەبەر</div>
         </div>
     </div>
 
@@ -188,7 +189,6 @@
             <div class="overlay-header">
                 <div class="filter-tabs">
                     <div class="tab focusable active" data-filter="all">هەمووی</div>
-                    <div class="tab focusable" data-filter="fav">★ دڵخوازەکان</div>
                 </div>
                 <button class="close-list-btn focusable" id="btnCloseList">داخستن ✕</button>
             </div>
@@ -250,7 +250,6 @@
 
 <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
 <script>
-    // لینی نوێی بەستراوەی Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxgg7tupLXz54niN1LMj-uAl3C16fw27JkDNUNEZo29nCxGnnioVJpQQpGrNCx9KjIO/exec";
     
     const rawM3uUrls = [
@@ -269,7 +268,6 @@
 
     let channelsData = [];
     let currentPlayIndex = -1;  
-    let currentFilter = 'all';  
     let channelsLoaded = false;
     let nowPlayingTimeout = null;
 
@@ -283,7 +281,6 @@
         return new Date().toISOString().split('T')[0];
     }
 
-    /* ---------- Fetch users directly from Google Sheet API ---------- */
     async function fetchUsersFromSheet() {
         try {
             const res = await fetch(`${SCRIPT_URL}?action=getUsers`);
@@ -295,7 +292,7 @@
         }
     }
 
-    /* ---------- Viewer login ---------- */
+    /* ---------- Viewer Login ---------- */
     document.getElementById('btnUserLogin').onclick = async function() {
         const uname = document.getElementById('loginUsername').value.trim();
         const pass = document.getElementById('loginPassword').value.trim();
@@ -338,7 +335,7 @@
         showScreen('loginScreen');
     };
 
-    /* ---------- Admin login ---------- */
+    /* ---------- Admin Login ---------- */
     document.getElementById('adminLoginLink').onclick = function() {
         const u = prompt('ناوی بەکارهێنەری بەڕێوەبەر:');
         if (u === null) return;
@@ -357,7 +354,7 @@
         showScreen('loginScreen');
     };
 
-    /* ---------- Admin Actions (Google Sheet backend) ---------- */
+    /* ---------- Admin Actions ---------- */
     document.getElementById('userForm').onsubmit = async function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSave');
@@ -492,9 +489,34 @@
             parseM3u(fetchedData);
             channelsLoaded = true;
             renderChannelList();
+            if (channelsData.length > 0) {
+                playChannelByIndex(0);
+            }
         } else {
             listContainer.innerHTML = `<p style="color:#ff4d4d; text-align:center; margin-top:20px;">نەتوانرا کەناڵەکان باربکرێن!</p>`;
         }
+    }
+
+    /* ---------- Reorder Channel Logic ---------- */
+    function moveChannel(idx, direction) {
+        let newIndex = idx + direction;
+        if (newIndex < 0 || newIndex >= channelsData.length) return;
+
+        // Swap channels in array
+        let temp = channelsData[idx];
+        channelsData[idx] = channelsData[newIndex];
+        channelsData[newIndex] = temp;
+
+        if (currentPlayIndex === idx) currentPlayIndex = newIndex;
+        else if (currentPlayIndex === newIndex) currentPlayIndex = idx;
+
+        renderChannelList();
+
+        // Refocus on moved item
+        setTimeout(() => {
+            let items = document.querySelectorAll('.channel-item');
+            if (items[newIndex]) items[newIndex].focus();
+        }, 50);
     }
 
     function renderChannelList() {
@@ -502,8 +524,12 @@
         if (channelsData.length === 0) return;
 
         listContainer.innerHTML = channelsData.map((c, idx) => `
-            <div class="channel-item focusable ${idx === currentPlayIndex ? 'playing' : ''}" tabindex="0" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
-                <span class="channel-name">${c.name}</span>
+            <div class="channel-item-row">
+                <div class="channel-item focusable" tabindex="0" data-idx="${idx}" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
+                    <span class="channel-name">${idx + 1}. ${c.name}</span>
+                </div>
+                <button class="move-btn focusable" title="سەرەوە" onclick="moveChannel(${idx}, -1)">▲</button>
+                <button class="move-btn focusable" title="خوارەوە" onclick="moveChannel(${idx}, 1)">▼</button>
             </div>
         `).join('');
 
@@ -519,8 +545,12 @@
         const ch = channelsData[idx];
 
         player.src({ src: ch.url, type: 'application/x-mpegURL' });
-        player.play();
-        showNowPlaying(ch.name);
+        player.play().catch(e => console.log("Play interrupted"));
+        showNowPlaying(`${idx + 1}. ${ch.name}`);
+
+        document.querySelectorAll('.channel-item').forEach((el, i) => {
+            el.classList.toggle('playing', i === idx);
+        });
     }
 
     function showNowPlaying(name) {
@@ -528,7 +558,7 @@
         label.innerText = name;
         label.classList.add('show');
         clearTimeout(nowPlayingTimeout);
-        nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 2500);
+        nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 3000);
     }
 
     function toggleChannelList(forceState) {
@@ -553,12 +583,92 @@
             if (!activeScreen) return;
             focusableElements = Array.from(activeScreen.querySelectorAll('.focusable'));
         }
+        
         currentIndex = 0;
-        if (focusableElements.length > 0) focusableElements[0].focus();
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        }
     }
+
+    /* =========================================================
+       Smart TV & Remote Control Keydown Event Handler
+       ========================================================= */
+    document.addEventListener('keydown', function(e) {
+        const keyCode = e.keyCode;
+        const listOpen = document.getElementById('channelOverlay').classList.contains('open');
+        const isTvActive = document.getElementById('tvScreen').classList.contains('active');
+
+        switch (keyCode) {
+            case 38: // Arrow Up
+                e.preventDefault();
+                if (isTvActive && !listOpen) {
+                    playChannelByIndex(currentPlayIndex - 1);
+                } else if (listOpen && e.shiftKey && document.activeElement.classList.contains('channel-item')) {
+                    // Shift + Up = Move Channel Up
+                    let idx = parseInt(document.activeElement.getAttribute('data-idx'));
+                    moveChannel(idx, -1);
+                } else if (focusableElements.length > 0) {
+                    currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+                    focusableElements[currentIndex].focus();
+                }
+                break;
+
+            case 40: // Arrow Down
+                e.preventDefault();
+                if (isTvActive && !listOpen) {
+                    playChannelByIndex(currentPlayIndex + 1);
+                } else if (listOpen && e.shiftKey && document.activeElement.classList.contains('channel-item')) {
+                    // Shift + Down = Move Channel Down
+                    let idx = parseInt(document.activeElement.getAttribute('data-idx'));
+                    moveChannel(idx, 1);
+                } else if (focusableElements.length > 0) {
+                    currentIndex = (currentIndex + 1) % focusableElements.length;
+                    focusableElements[currentIndex].focus();
+                }
+                break;
+
+            case 37: // Arrow Left
+            case 39: // Arrow Right
+                if (focusableElements.length > 0) {
+                    if (keyCode === 37) currentIndex = (currentIndex + 1) % focusableElements.length;
+                    else currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+                    focusableElements[currentIndex].focus();
+                }
+                break;
+
+            case 13: // Enter / OK
+                if (document.activeElement) {
+                    document.activeElement.click();
+                }
+                break;
+
+            case 33: // Page Up / Channel Up
+            case 427:
+                e.preventDefault();
+                if (isTvActive) playChannelByIndex(currentPlayIndex - 1);
+                break;
+
+            case 34: // Page Down / Channel Down
+            case 428:
+                e.preventDefault();
+                if (isTvActive) playChannelByIndex(currentPlayIndex + 1);
+                break;
+
+            case 461: // webOS Back
+            case 8:   // Backspace
+            case 27:  // Escape
+                e.preventDefault();
+                if (listOpen) toggleChannelList(false);
+                else if (isTvActive) toggleChannelList(true);
+                break;
+
+            case 406: // Blue Button / LIST
+                if (isTvActive) toggleChannelList();
+                break;
+        }
+    });
 
     showScreen('loginScreen');
 </script>
-    </script>
 </body>
 </html>
