@@ -187,7 +187,7 @@
     <!-- ================= LOGIN SCREEN ================= -->
     <div id="loginScreen" class="screen active">
         <div class="login-box">
-            <h2 style="color:#00adb5; font-size:22px; margin-bottom:6px;">Atta TV</h2>
+            <h2 style="color:#00adb5; font-size:22px; margin-bottom:6px;">ئەتا تیڤی</h2>
             <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
 
             <input type="text" id="loginUsername" class="focusable" tabindex="0" placeholder="ناوی بەکارهێنەر">
@@ -594,13 +594,16 @@
             refreshFocusableList();
         }
 
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.filter === filter);
+            });
+            renderChannelList();
+        }
+
         document.querySelectorAll('.tab').forEach(tab => {
-            tab.onclick = function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                currentFilter = this.dataset.filter;
-                renderChannelList();
-            };
+            tab.onclick = function() { setFilter(this.dataset.filter); };
         });
 
         function playChannelByIndex(idx) {
@@ -673,55 +676,156 @@
             focusableElements[currentIndex].scrollIntoView({ block: 'nearest' });
         }
 
+        function toggleFavoriteCurrent() {
+            if (currentPlayIndex === -1 || !channelsData[currentPlayIndex]) return;
+            const ch = channelsData[currentPlayIndex];
+            toggleFavorite(ch.url);
+            const nowFav = isFavorite(ch.url);
+            showNowPlaying((nowFav ? '★ زیادکرا بۆ دڵخوازەکان: ' : 'لابرا لە دڵخوازەکان: ') + ch.name);
+        }
+
+        /* Direct channel number entry via remote number pad (e.g. "12" + pause -> channel 12) */
+        let digitBuffer = '';
+        let digitTimeout = null;
+        function handleDigitInput(digit) {
+            digitBuffer += String(digit);
+            showNowPlaying('کەناڵ: ' + digitBuffer);
+            clearTimeout(digitTimeout);
+            digitTimeout = setTimeout(() => {
+                const num = parseInt(digitBuffer, 10);
+                digitBuffer = '';
+                if (!isNaN(num) && num >= 1 && num <= channelsData.length) {
+                    playChannelByIndex(num - 1);
+                }
+            }, 1200);
+        }
+
+        /* ---------- Remote control key map ----------
+           Covers standard Smart TV remote codes (Samsung/Tizen and common equivalents)
+           in addition to plain keyboard arrows/enter, so the app works both on a
+           real TV remote and a keyboard/mouse during testing. */
+        const KEY_ACTIONS = {
+            UP: [38],
+            DOWN: [40],
+            OK: [13],
+            BACK: [10009, 461],          // RETURN key
+            EXIT: [10182],               // EXIT key
+            CH_UP: [427],                // CH ^
+            CH_DOWN: [428],              // CH v
+            CH_LIST: [447, 458],         // CH LIST / GUIDE
+            RED: [403],                  // colored button A
+            GREEN: [404],                // colored button B
+            YELLOW: [405],               // colored button C
+            BLUE: [406],                 // colored button D
+            PLAY: [415],
+            PAUSE: [19],
+            STOP: [413],
+            REWIND: [412],
+            FASTFORWARD: [417]
+        };
+
+        function matchAction(keyCode) {
+            for (const action in KEY_ACTIONS) {
+                if (KEY_ACTIONS[action].includes(keyCode)) return action;
+            }
+            return null;
+        }
+
         document.addEventListener('keydown', function(e) {
             const tvActive = document.getElementById('tvScreen').classList.contains('active');
             const listOpen = document.getElementById('channelOverlay').classList.contains('open');
 
-            // On the TV screen with the list closed: Up/Down surf channels directly, OK opens the list
+            // Number pad -> direct channel entry (only while watching, list closed)
+            if (tvActive && !listOpen && e.keyCode >= 48 && e.keyCode <= 57) {
+                handleDigitInput(e.keyCode - 48);
+                e.preventDefault();
+                return;
+            }
+
+            const action = matchAction(e.keyCode);
+            if (!action) return;
+
+            // On the TV screen with the list closed: Up/Down/CH surf channels directly, OK/CH-LIST opens the list
             if (tvActive && !listOpen) {
-                switch (e.keyCode) {
-                    case 38: // UP -> previous channel
+                switch (action) {
+                    case 'UP':
+                    case 'CH_UP':
                         changeChannel(-1);
                         e.preventDefault();
                         return;
-                    case 40: // DOWN -> next channel
+                    case 'DOWN':
+                    case 'CH_DOWN':
                         changeChannel(1);
                         e.preventDefault();
                         return;
-                    case 13: // OK -> open channel list
+                    case 'OK':
+                    case 'CH_LIST':
                         toggleChannelList(true);
                         e.preventDefault();
                         return;
-                    case 415: // Play
-                    case 19:  // Pause
+                    case 'RED':
+                        toggleFavoriteCurrent();
+                        e.preventDefault();
+                        return;
+                    case 'GREEN':
+                        setFilter('all');
+                        toggleChannelList(true);
+                        e.preventDefault();
+                        return;
+                    case 'YELLOW':
+                        setFilter('fav');
+                        toggleChannelList(true);
+                        e.preventDefault();
+                        return;
+                    case 'PLAY':
+                    case 'PAUSE':
                         if (player) { if (player.paused()) player.play(); else player.pause(); }
+                        e.preventDefault();
+                        return;
+                    case 'STOP':
+                        if (player) player.pause();
+                        e.preventDefault();
+                        return;
+                    case 'REWIND':
+                        if (player) player.currentTime(Math.max(0, player.currentTime() - 10));
+                        e.preventDefault();
+                        return;
+                    case 'FASTFORWARD':
+                        if (player) player.currentTime(player.currentTime() + 10);
+                        e.preventDefault();
+                        return;
+                    case 'EXIT':
+                        document.getElementById('btnTvLogout').click();
+                        e.preventDefault();
                         return;
                 }
                 return;
             }
 
             // Login / Admin screens, or the channel list overlay open: normal focus navigation
-            switch (e.keyCode) {
-                case 38: // UP
+            switch (action) {
+                case 'UP':
                     setFocus(currentIndex - 1);
                     e.preventDefault();
                     break;
-                case 40: // DOWN
+                case 'DOWN':
                     setFocus(currentIndex + 1);
                     e.preventDefault();
                     break;
-                case 13: // OK / Enter
+                case 'OK':
                     if (focusableElements[currentIndex]) focusableElements[currentIndex].click();
                     e.preventDefault();
                     break;
-                case 27: // Back -> close channel list if open
+                case 'BACK':
+                case 'CH_LIST':
+                case 'EXIT':
                     if (tvActive && listOpen) {
                         toggleChannelList(false);
                         e.preventDefault();
                     }
                     break;
-                case 415: // Play
-                case 19:  // Pause
+                case 'PLAY':
+                case 'PAUSE':
                     if (player) { if (player.paused()) player.play(); else player.pause(); }
                     break;
             }
