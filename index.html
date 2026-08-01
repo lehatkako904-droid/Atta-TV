@@ -78,6 +78,7 @@
             position: absolute; bottom: 70px; right: 20px; background: rgba(0,0,0,0.75); color: #fff;
             padding: 10px 18px; border-radius: 6px; font-size: 15px; z-index: 25; opacity: 0;
             transition: opacity 0.4s ease; pointer-events: none;
+            max-width: 60%; word-wrap: break-word; direction: ltr; text-align: right;
         }
         .now-playing-label.show { opacity: 1; }
 
@@ -629,12 +630,12 @@
             playChannelByIndex(startIdx);
         }
 
-        function showNowPlaying(name) {
+        function showNowPlaying(name, duration) {
             const label = document.getElementById('nowPlayingLabel');
             label.innerText = name;
             label.classList.add('show');
             clearTimeout(nowPlayingTimeout);
-            nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 2500);
+            nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), duration || 2500);
         }
 
         /* ---------- Channel list overlay toggle ---------- */
@@ -701,33 +702,43 @@
         }
 
         /* ---------- Remote control key map ----------
-           Covers standard Smart TV remote codes (Samsung/Tizen and common equivalents)
-           in addition to plain keyboard arrows/enter, so the app works both on a
-           real TV remote and a keyboard/mouse during testing. */
+           Covers standard Smart TV remote codes across platforms. Different TV
+           browsers (Samsung Tizen, LG webOS, Android TV, generic) report the same
+           physical button differently: some use a legacy numeric e.keyCode, others
+           populate the modern e.key string (e.g. "ColorF0Red", "ChannelUp", "Back").
+           We check both so one button works across brands. */
         const KEY_ACTIONS = {
-            UP: [38],
-            DOWN: [40],
-            OK: [13],
-            BACK: [10009, 461],          // RETURN key
-            EXIT: [10182],               // EXIT key
-            CH_UP: [427],                // CH ^
-            CH_DOWN: [428],              // CH v
-            CH_LIST: [447, 458],         // CH LIST / GUIDE
-            RED: [403],                  // colored button A
-            GREEN: [404],                // colored button B
-            YELLOW: [405],               // colored button C
-            BLUE: [406],                 // colored button D
-            PLAY: [415],
-            PAUSE: [19],
-            STOP: [413],
-            REWIND: [412],
-            FASTFORWARD: [417]
+            UP:           { codes: [38],           keys: ['ArrowUp'] },
+            DOWN:         { codes: [40],           keys: ['ArrowDown'] },
+            OK:           { codes: [13],           keys: ['Enter'] },
+            BACK:         { codes: [10009, 461],   keys: ['Back', 'GoBack', 'Backspace'] },
+            EXIT:         { codes: [10182],        keys: ['Exit'] },
+            CH_UP:        { codes: [427],          keys: ['ChannelUp'] },
+            CH_DOWN:      { codes: [428],          keys: ['ChannelDown'] },
+            CH_LIST:      { codes: [447, 458],     keys: ['Guide', 'ChannelList', 'List'] },
+            RED:          { codes: [403],          keys: ['ColorF0Red'] },
+            GREEN:        { codes: [404],          keys: ['ColorF1Green'] },
+            YELLOW:       { codes: [405],          keys: ['ColorF2Yellow'] },
+            BLUE:         { codes: [406],          keys: ['ColorF3Blue'] },
+            PLAY:         { codes: [415],          keys: ['MediaPlay'] },
+            PAUSE:        { codes: [19],           keys: ['MediaPause'] },
+            STOP:         { codes: [413],          keys: ['MediaStop'] },
+            REWIND:       { codes: [412],          keys: ['MediaRewind', 'MediaTrackPrevious', 'MediaSeekBackward'] },
+            FASTFORWARD:  { codes: [417],          keys: ['MediaFastForward', 'MediaTrackNext', 'MediaSeekForward'] }
         };
 
-        function matchAction(keyCode) {
+        function matchAction(e) {
             for (const action in KEY_ACTIONS) {
-                if (KEY_ACTIONS[action].includes(keyCode)) return action;
+                const map = KEY_ACTIONS[action];
+                if (map.codes.includes(e.keyCode)) return action;
+                if (e.key && map.keys.includes(e.key)) return action;
             }
+            return null;
+        }
+
+        function isDigitEvent(e) {
+            if (e.keyCode >= 48 && e.keyCode <= 57) return e.keyCode - 48;
+            if (e.key && /^[0-9]$/.test(e.key)) return parseInt(e.key, 10);
             return null;
         }
 
@@ -736,14 +747,20 @@
             const listOpen = document.getElementById('channelOverlay').classList.contains('open');
 
             // Number pad -> direct channel entry (only while watching, list closed)
-            if (tvActive && !listOpen && e.keyCode >= 48 && e.keyCode <= 57) {
-                handleDigitInput(e.keyCode - 48);
+            const digit = isDigitEvent(e);
+            if (tvActive && !listOpen && digit !== null) {
+                handleDigitInput(digit);
                 e.preventDefault();
                 return;
             }
 
-            const action = matchAction(e.keyCode);
-            if (!action) return;
+            const action = matchAction(e);
+            if (!action) {
+                if (tvActive) {
+                    showNowPlaying('کلیلی نەناسراو -> keyCode: ' + e.keyCode + (e.key ? (' / key: ' + e.key) : ''), 4000);
+                }
+                return;
+            }
 
             // On the TV screen with the list closed: Up/Down/CH surf channels directly, OK/CH-LIST opens the list
             if (tvActive && !listOpen) {
