@@ -174,9 +174,10 @@
 <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
 
 <script>
-    // 🔗 لینکی نوێی Google Apps Script کە ناردت:
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzueMQDE_jmGYHuPquWabCZ4gypKS5-Z8Ccd-BnPGAJshzE_bH7WiEXHjz1Ubi8__Ll/exec";
-    const m3uUrl = "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u";
+    
+    // 🟢 لێرەدا لینکی کەناڵەکان ڕاستکراوەتەوە:
+    const m3uUrl = "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u.m3u";
 
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "admin123";
@@ -363,7 +364,8 @@
 
                 channelsLoaded = true;
                 renderChannelList();
-            });
+            })
+            .catch(err => console.error("کێشە لە خوێندنەوەی کەناڵەکان:", err));
     }
 
     function renderChannelList() {
