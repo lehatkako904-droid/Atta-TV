@@ -6,80 +6,246 @@
     <title>Atta TV - Smart TV Player & Admin Dashboard</title>
     <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
     <style>
+        /* ==========================================
+           10 MULTIPLE THEMES CONFIGURATION
+           ========================================== */
+        :root {
+            /* 1. Default: Ocean Cyan */
+            --bg-main: #0d0d0d;
+            --bg-panel: #181818;
+            --bg-input: #252525;
+            --primary-color: #00adb5;
+            --primary-hover: #00898f;
+            --text-color: #ffffff;
+            --text-sub: #888888;
+            --border-color: #282828;
+            --clock-bg: rgba(0, 0, 0, 0.65);
+        }
+
+        /* 2. Netflix Red / Midnight */
+        [data-theme="netflix"] {
+            --bg-main: #000000;
+            --bg-panel: #111111;
+            --bg-input: #1c1c1c;
+            --primary-color: #e50914;
+            --primary-hover: #b20710;
+            --text-color: #ffffff;
+            --text-sub: #777777;
+            --border-color: #222222;
+        }
+
+        /* 3. Cyber Purple */
+        [data-theme="purple"] {
+            --bg-main: #0f0c1b;
+            --bg-panel: #1a162b;
+            --bg-input: #27223d;
+            --primary-color: #9d4edd;
+            --primary-hover: #7b2cbf;
+            --text-color: #f1f1f1;
+            --text-sub: #9a8c9e;
+            --border-color: #342d4e;
+        }
+
+        /* 4. Matrix Neon Green */
+        [data-theme="matrix"] {
+            --bg-main: #05100a;
+            --bg-panel: #0d1f15;
+            --bg-input: #152e20;
+            --primary-color: #00ff66;
+            --primary-hover: #00cc52;
+            --text-color: #e0ffe8;
+            --text-sub: #669973;
+            --border-color: #1a3d2b;
+        }
+
+        /* 5. Gold Luxe */
+        [data-theme="gold"] {
+            --bg-main: #12100b;
+            --bg-panel: #1f1b12;
+            --bg-input: #2e281b;
+            --primary-color: #d4af37;
+            --primary-hover: #aa8c2c;
+            --text-color: #fffdf5;
+            --text-sub: #a19578;
+            --border-color: #3d3423;
+        }
+
+        /* 6. Crimson Rose */
+        [data-theme="crimson"] {
+            --bg-main: #14080e;
+            --bg-panel: #210f18;
+            --bg-input: #331826;
+            --primary-color: #ff2a6d;
+            --primary-hover: #d11d53;
+            --text-color: #fff0f5;
+            --text-sub: #9e7587;
+            --border-color: #421d30;
+        }
+
+        /* 7. Sunset Orange */
+        [data-theme="sunset"] {
+            --bg-main: #140c0a;
+            --bg-panel: #211511;
+            --bg-input: #33211b;
+            --primary-color: #ff6b35;
+            --primary-hover: #d45120;
+            --text-color: #fff5f0;
+            --text-sub: #a18074;
+            --border-color: #452b22;
+        }
+
+        /* 8. Cyberpunk Yellow */
+        [data-theme="yellow"] {
+            --bg-main: #121203;
+            --bg-panel: #1f1f08;
+            --bg-input: #2e2e0d;
+            --primary-color: #f1c40f;
+            --primary-hover: #c49f0c;
+            --text-color: #ffffff;
+            --text-sub: #9e9e6d;
+            --border-color: #3d3d12;
+        }
+
+        /* 9. Emerald Green */
+        [data-theme="emerald"] {
+            --bg-main: #061412;
+            --bg-panel: #0d211e;
+            --bg-input: #16332f;
+            --primary-color: #2ecc71;
+            --primary-hover: #25a25a;
+            --text-color: #f0fff8;
+            --text-sub: #78a196;
+            --border-color: #1e453f;
+        }
+
+        /* 10. Royal Blue */
+        [data-theme="royal"] {
+            --bg-main: #0a0f1d;
+            --bg-panel: #121a30;
+            --bg-input: #1d294a;
+            --primary-color: #3498db;
+            --primary-hover: #217dbb;
+            --text-color: #f0f8ff;
+            --text-sub: #7a92b5;
+            --border-color: #273863;
+        }
+
+        /* Light Mode Override */
+        [data-mode="light"] {
+            --bg-main: #f0f2f5;
+            --bg-panel: #ffffff;
+            --bg-input: #e4e6eb;
+            --text-color: #1c1e21;
+            --text-sub: #65676b;
+            --border-color: #cccccc;
+            --clock-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        /* ==========================================
+           CORE STYLES
+           ========================================== */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-        body { background-color: #0d0d0d; color: #fff; overflow: hidden; height: 100vh; }
+        body { background-color: var(--bg-main); color: var(--text-color); overflow: hidden; height: 100vh; transition: background-color 0.3s, color 0.3s; }
 
         .screen {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            height: 100vh; width: 100%; overflow: hidden; background: #0d0d0d;
+            height: 100vh; width: 100%; overflow: hidden; background: var(--bg-main);
         }
         .screen.active { display: flex; }
 
         #loginScreen {
-            align-items: center; justify-content: center;
-            background: radial-gradient(circle at 50% 20%, #10292b 0%, #0d0d0d 70%);
+            align-items: center; justify-content: center; flex-direction: column;
+            background: radial-gradient(circle at 50% 20%, var(--bg-panel) 0%, var(--bg-main) 70%);
         }
         .login-box {
-            width: 360px; background: #181818; border: 1px solid #282828;
-            border-radius: 12px; padding: 30px; text-align: center;
+            width: 420px; max-width: 95%; background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
-        .login-box h1 { color: #dad68d; font-size: 22px; margin-bottom: 6px; }
-        .login-box p.sub { color: #888; font-size: 13px; margin-bottom: 20px; }
+        .login-box h1 { color: var(--primary-color); font-size: 24px; margin-bottom: 6px; }
+        .login-box p.sub { color: var(--text-sub); font-size: 13px; margin-bottom: 16px; }
         .login-box input {
             width: 100%; padding: 12px 14px; margin-bottom: 12px;
-            border-radius: 6px; border: 2px solid #333; background: #252525;
-            color: #fff; font-size: 15px;
+            border-radius: 6px; border: 2px solid var(--border-color); background: var(--bg-input);
+            color: var(--text-color); font-size: 15px;
         }
         
-        /* شاردنەوەی ستایلی Auto-fill لە کرۆمی تیڤی */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0px 1000px #252525 inset !important;
-            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
+            -webkit-text-fill-color: var(--text-color) !important;
         }
 
         .focusable:focus, .active-focus {
-            border-color: #00adb5 !important;
+            border-color: var(--primary-color) !important;
             outline: none !important;
-            box-shadow: 0 0 14px rgba(189, 201, 147, 0.8) !important;
+            box-shadow: 0 0 14px var(--primary-color) !important;
             transform: scale(1.02);
-            background-color: #00adb5 !important;
+            background-color: var(--primary-color) !important;
             color: #fff !important;
         }
         
         .login-box input.focusable:focus {
-            background-color: #252525 !important;
-            color: #fff !important;
+            background-color: var(--bg-input) !important;
+            color: var(--text-color) !important;
         }
 
         .btn-login {
-            width: 100%; padding: 12px; background: #00adb5; color: #fff; font-weight: bold;
+            width: 100%; padding: 12px; background: var(--primary-color); color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 4px;
         }
         .login-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; min-height: 16px; }
-        .admin-link { margin-top: 18px; font-size: 12px; color: #666; cursor: pointer; text-decoration: underline; }
+        .admin-link { margin-top: 18px; font-size: 12px; color: var(--text-sub); cursor: pointer; text-decoration: underline; }
+
+        /* Controls Panel for Settings (10 Themes + Light Mode) */
+        .settings-bar {
+            display: flex; gap: 6px; margin-bottom: 16px; justify-content: center; flex-wrap: wrap;
+            max-height: 110px; overflow-y: auto; padding: 4px;
+        }
+        .theme-btn, .mode-btn {
+            background: var(--bg-input); color: var(--text-color); border: 1px solid var(--border-color);
+            padding: 6px 10px; border-radius: 16px; font-size: 11px; cursor: pointer; font-weight: bold;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover, .mode-btn:hover {
+            border-color: var(--primary-color);
+        }
 
         #tvScreen { height: 100vh; position: relative; }
         .player-container { position: relative; width: 100%; height: 100vh; background: #000; }
         .video-js { width: 100% !important; height: 100vh !important; }
 
+        .tv-overlay-controls {
+            opacity: 1; transition: opacity 0.5s ease-in-out;
+        }
+        .tv-overlay-controls.hidden-ui {
+            opacity: 0; pointer-events: none;
+        }
+
         .floating-controls { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 25; }
         .float-btn {
-            background: rgba(24,24,24,0.85); color: #ddd; border: 2px solid transparent; border-radius: 6px;
+            background: var(--bg-panel); color: var(--text-color); border: 2px solid var(--border-color); border-radius: 6px;
             padding: 10px 16px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
         }
 
+        .tv-clock-fixed {
+            position: absolute; top: 20px; right: 20px; z-index: 26;
+            background: var(--clock-bg); color: var(--primary-color);
+            padding: 8px 16px; border-radius: 6px; font-size: 16px; font-weight: bold;
+            letter-spacing: 1px; backdrop-filter: blur(4px); border: 1px solid var(--border-color);
+            pointer-events: none;
+        }
+
         .now-playing-label {
-            position: absolute; bottom: 70px; right: 20px; background: rgba(0, 0, 0, 0); color: #afb740;
+            position: absolute; bottom: 70px; right: 20px; background: rgba(0, 0, 0, 0.7); color: var(--primary-color);
             padding: 12px 22px; border-radius: 8px; font-size: 18px; font-weight: bold; z-index: 25; opacity: 0;
-            transition: opacity 0.4s ease; pointer-events: none; border: 1px solid #7a7c6c;
+            transition: opacity 0.4s ease; pointer-events: none; border: 1px solid var(--border-color);
         }
         .now-playing-label.show { opacity: 1; }
 
         .channel-overlay {
             position: absolute; top: 0; right: 0; bottom: 0; width: 420px; max-width: 90%;
-            background: rgba(14,14,14,0.97); border-left: 2px solid #282828; padding: 18px;
+            background: var(--bg-panel); border-left: 2px solid var(--border-color); padding: 18px;
             display: flex; flex-direction: column; transform: translateX(100%);
             transition: transform 0.25s ease; z-index: 30;
         }
@@ -88,70 +254,66 @@
         .overlay-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
         .filter-tabs { display: flex; gap: 8px; }
         .tab {
-            padding: 8px 12px; background: #252525; border-radius: 6px; font-size: 12px; color: #ccc;
+            padding: 8px 12px; background: var(--bg-input); border-radius: 6px; font-size: 12px; color: var(--text-color);
             cursor: pointer; border: 2px solid transparent; white-space: nowrap;
         }
-        .tab.active { background: #00adb5; color: #fff; }
+        .tab.active { background: var(--primary-color); color: #fff; }
 
         .close-list-btn {
-            background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
+            background: var(--bg-input); color: var(--text-color); border: 2px solid transparent; border-radius: 6px;
             padding: 8px 12px; font-size: 12px; cursor: pointer; white-space: nowrap;
         }
 
         .channel-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
-
-        .channel-item-row {
-            display: flex; align-items: center; gap: 6px; width: 100%;
-        }
+        .channel-item-row { display: flex; align-items: center; gap: 6px; width: 100%; }
 
         .channel-item {
-            flex: 1; padding: 12px 14px; background: #252525; border-radius: 6px; cursor: pointer;
-            font-size: 14px; color: #ddd; border: 2px solid transparent; transition: all 0.2s ease;
+            flex: 1; padding: 12px 14px; background: var(--bg-input); border-radius: 6px; cursor: pointer;
+            font-size: 14px; color: var(--text-color); border: 2px solid transparent; transition: all 0.2s ease;
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
         .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .channel-item.playing { border-right: 5px solid #bc3535; }
+        .channel-item.playing { border-right: 5px solid var(--primary-color); }
 
         .move-btn {
-            background: #181818; color: #00adb5; border: 1px solid #333; border-radius: 4px;
+            background: var(--bg-main); color: var(--primary-color); border: 1px solid var(--border-color); border-radius: 4px;
             padding: 8px 10px; font-size: 12px; cursor: pointer; font-weight: bold;
         }
-        .move-btn:hover { background: #2c3031; color: #fff; }
 
         #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
         .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-        .admin-topbar h1 { color: #67603e; font-size: 20px; }
+        .admin-topbar h1 { color: var(--primary-color); font-size: 20px; }
         .logout-btn {
-            background: #252525; color: #ddd; border: 2px solid transparent; border-radius: 6px;
+            background: var(--bg-input); color: var(--text-color); border: 2px solid transparent; border-radius: 6px;
             padding: 8px 16px; font-size: 13px; cursor: pointer;
         }
 
         .admin-body { display: flex; gap: 18px; flex: 1; min-height: 0; }
         .admin-form-panel {
-            flex: 1; min-width: 300px; background: #181818; border-radius: 10px; padding: 18px;
-            display: flex; flex-direction: column;
+            flex: 1; min-width: 300px; background: var(--bg-panel); border-radius: 10px; padding: 18px;
+            display: flex; flex-direction: column; border: 1px solid var(--border-color);
         }
-        .admin-form-panel h2 { color: #b1a04b; font-size: 16px; margin-bottom: 14px; text-align: center; }
+        .admin-form-panel h2 { color: var(--primary-color); font-size: 16px; margin-bottom: 14px; text-align: center; }
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: #ccc; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-sub); }
         .form-group input {
-            width: 100%; padding: 10px; border-radius: 5px; border: 2px solid #333;
-            background: #252525; color: #fff; font-size: 14px;
+            width: 100%; padding: 10px; border-radius: 5px; border: 2px solid var(--border-color);
+            background: var(--bg-input); color: var(--text-color); font-size: 14px;
         }
         .btn-submit {
-            width: 100%; padding: 11px; background: #a6802e; color: #fff; font-weight: bold;
+            width: 100%; padding: 11px; background: var(--primary-color); color: #fff; font-weight: bold;
             border: 2px solid transparent; border-radius: 6px; cursor: pointer; margin-top: 6px; font-size: 14px;
         }
 
         .admin-table-panel {
-            flex: 2; min-width: 360px; background: #181818; border-radius: 10px; padding: 18px;
-            display: flex; flex-direction: column; min-height: 0;
+            flex: 2; min-width: 360px; background: var(--bg-panel); border-radius: 10px; padding: 18px;
+            display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--border-color);
         }
-        .admin-table-panel h2 { color: #a15559; font-size: 16px; margin-bottom: 12px; }
-        .table-container { flex: 1; overflow-y: auto; border: 1px solid #282828; border-radius: 6px; }
+        .admin-table-panel h2 { color: var(--primary-color); font-size: 16px; margin-bottom: 12px; }
+        .table-container { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border: 1px solid #282828; padding: 8px; text-align: center; }
-        th { background: #222; color: #b6b251; position: sticky; top: 0; }
+        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: center; color: var(--text-color); }
+        th { background: var(--bg-input); color: var(--primary-color); position: sticky; top: 0; }
         .status-active { color: #00ff66; font-weight: bold; }
         .status-expired { color: #ff4d4d; font-weight: bold; }
         .status-blocked { color: #ffb84d; font-weight: bold; }
@@ -161,7 +323,7 @@
         }
         .btn-block { background: #b53d3d; }
         .btn-unblock { background: #2e8b57; }
-        .btn-delete { background: #444; }
+        .btn-delete { background: #555; }
     </style>
 </head>
 <body>
@@ -171,7 +333,22 @@
         <div class="login-box">
             <h1>Atta_tv</h1>
             <p class="sub">تکایە بچۆ ژوورەوە بۆ بینینی کەناڵەکان</p>
-            <!-- زیەکردنی autocomplete و autocorrect بۆ ئەوەی auto-fill ڕەفتاری هەڵە نەکات -->
+            
+            <!-- 10 Themes Selection Panel -->
+            <div class="settings-bar">
+                <button class="mode-btn focusable" onclick="toggleDarkMode()">☀️/🌙 ڕووناکی</button>
+                <button class="theme-btn focusable" onclick="setTheme('default')">شین</button>
+                <button class="theme-btn focusable" onclick="setTheme('netflix')">ڕەش (Netflix)</button>
+                <button class="theme-btn focusable" onclick="setTheme('purple')">وەنەوشەیی</button>
+                <button class="theme-btn focusable" onclick="setTheme('matrix')">نێئۆن</button>
+                <button class="theme-btn focusable" onclick="setTheme('gold')">زێڕین</button>
+                <button class="theme-btn focusable" onclick="setTheme('crimson')">سوور</button>
+                <button class="theme-btn focusable" onclick="setTheme('sunset')">پرتەقاڵی</button>
+                <button class="theme-btn focusable" onclick="setTheme('yellow')">زەرد</button>
+                <button class="theme-btn focusable" onclick="setTheme('emerald')">زومرود</button>
+                <button class="theme-btn focusable" onclick="setTheme('royal')">پاشایی</button>
+            </div>
+
             <input type="text" id="loginUsername" class="focusable" placeholder="ناوی بەکارهێنەر" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
             <input type="password" id="loginPassword" class="focusable" placeholder="وشەی نهێنی" autocomplete="off">
             <button class="btn-login focusable" id="btnUserLogin">چوونەژوورەوە</button>
@@ -187,10 +364,14 @@
                 <source src="" type="application/x-mpegURL">
             </video>
 
-            <div class="floating-controls">
-                <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
+            <div class="tv-clock-fixed" id="tvClock">00:00:00</div>
+
+            <div id="tvUiControls" class="tv-overlay-controls">
+                <div class="floating-controls">
+                    <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
+                </div>
+                <button class="float-btn focusable" id="btnTvLogout" style="position:absolute; bottom:20px; left:20px; z-index:25;">چوونەدەرەوە</button>
             </div>
-            <button class="float-btn focusable" id="btnTvLogout" style="position:absolute; bottom:20px; left:20px; z-index:25;">چوونەدەرەوە</button>
 
             <div class="now-playing-label" id="nowPlayingLabel"></div>
         </div>
@@ -203,7 +384,7 @@
                 <button class="close-list-btn focusable" id="btnCloseList">داخستن ✕</button>
             </div>
             <div class="channel-list" id="channelList">
-                <p style="text-align:center; color:#888; margin-top:20px;">تکایە چاوەڕێ بکە...</p>
+                <p style="text-align:center; color:var(--text-sub); margin-top:20px;">تکایە چاوەڕێ بکە...</p>
             </div>
         </div>
     </div>
@@ -281,10 +462,75 @@
     let channelsLoaded = false;
     let nowPlayingTimeout = null;
 
+    /* ---------- Theme & Dark Mode System ---------- */
+    function setTheme(themeName) {
+        if (themeName === 'default') {
+            document.documentElement.removeAttribute('data-theme');
+        } else {
+            document.documentElement.setAttribute('data-theme', themeName);
+        }
+        localStorage.setItem('atta_tv_theme', themeName);
+    }
+
+    function toggleDarkMode() {
+        const currentMode = document.documentElement.getAttribute('data-mode');
+        if (currentMode === 'light') {
+            document.documentElement.removeAttribute('data-mode');
+            localStorage.setItem('atta_tv_mode', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-mode', 'light');
+            localStorage.setItem('atta_tv_mode', 'light');
+        }
+    }
+
+    (function loadSavedSettings() {
+        const savedTheme = localStorage.getItem('atta_tv_theme');
+        const savedMode = localStorage.getItem('atta_tv_mode');
+        if (savedTheme) setTheme(savedTheme);
+        if (savedMode === 'light') document.documentElement.setAttribute('data-mode', 'light');
+    })();
+
+    /* ---------- Clock Logic ---------- */
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const clockEl = document.getElementById('tvClock');
+        if (clockEl) {
+            clockEl.innerText = `${hours}:${minutes}:${seconds}`;
+        }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+    
+    /* ---------------- UI Auto-Hide Logic ---------------- */
+    let uiHideTimeout = null;
+
+    function resetUiTimer() {
+        const uiControls = document.getElementById('tvUiControls');
+        const tvActive = document.getElementById('tvScreen').classList.contains('active');
+        const listOpen = document.getElementById('channelOverlay').classList.contains('open');
+
+        if (!tvActive) return;
+
+        uiControls.classList.remove('hidden-ui');
+        clearTimeout(uiHideTimeout);
+
+        if (listOpen) return;
+
+        uiHideTimeout = setTimeout(() => {
+            uiControls.classList.add('hidden-ui');
+        }, 5000);
+    }
+
+    document.addEventListener('mousemove', resetUiTimer);
+
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         refreshFocusableList();
+        if (id === 'tvScreen') resetUiTimer();
     }
 
     function todayStr() {
@@ -412,7 +658,7 @@
 
     async function renderUserTable() {
         const tbody = document.getElementById('userTable');
-        tbody.innerHTML = `<tr><td colspan="5" style="color:#00adb5;">خەریکی بارکردنی بەکارهێنەرانە لە Google Sheet...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--primary-color);">خەریکی بارکردنی بەکارهێنەرانە لە Google Sheet...</td></tr>`;
 
         const users = await fetchUsersFromSheet();
         const today = todayStr();
@@ -487,7 +733,7 @@
         if (!player) player = videojs('tv-player');
 
         const listContainer = document.getElementById('channelList');
-        listContainer.innerHTML = `<p style="text-align:center; color:#00adb5; margin-top:20px;">لە حاڵەتی بارکردنی کەناڵەکاندا...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:var(--primary-color); margin-top:20px;">لە حاڵەتی بارکردنی کەناڵەکاندا...</p>`;
 
         let fetchedData = null;
         for (let targetUrl of rawM3uUrls) {
@@ -573,6 +819,7 @@
         const overlay = document.getElementById('channelOverlay');
         const shouldOpen = (typeof forceState === 'boolean') ? forceState : !overlay.classList.contains('open');
         overlay.classList.toggle('open', shouldOpen);
+        resetUiTimer();
         refreshFocusableList();
     }
 
@@ -585,7 +832,7 @@
             const listOpen = document.getElementById('channelOverlay').classList.contains('open');
             focusableElements = listOpen
                 ? Array.from(document.querySelectorAll('#channelOverlay .focusable'))
-                : Array.from(document.querySelectorAll('.floating-controls .focusable'));
+                : Array.from(document.querySelectorAll('.floating-controls .focusable, #btnTvLogout'));
         } else {
             const activeScreen = document.querySelector('.screen.active');
             if (!activeScreen) return;
@@ -602,25 +849,17 @@
        Smart TV & Remote Control Keydown Event Handler
        ========================================================= */
     document.addEventListener('keydown', function(e) {
+        resetUiTimer();
+
         const keyCode = e.keyCode;
         const activeEl = document.activeElement;
         
-        // پشکنین کە ئایا بەکارهێنەر ئێستا لە ناو خانەی Input دا دەنووسێت یان نا
         const isWritingInInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-
-        // کاتی داگرتنی Backspace / Delete یان دوگمەی گەڕانەوەی ڕیمۆتی Smart TV
         const isBackKey = keyCode === 8 || keyCode === 461 || keyCode === 10009;
 
-        // ئەگەر بەکارهێنەر لەناو خانەی Input بوو:
         if (isWritingInInput) {
-            // ئەگەر دوگمەی Delete / Backspace بوو، لێگەڕێ وێبگەڕەکە بە ئاسایی پیت بسڕێتەوە
-            if (isBackKey) {
-                return; // هیچ preventDefault مەکە تا ڕەش بێتەوە
-            }
-            // ئەگەر Enter بوو، ڕێگە بپەڕێنێتەوە بۆ Submit
-            if (keyCode === 13) {
-                return;
-            }
+            if (isBackKey) return;
+            if (keyCode === 13) return;
         }
 
         const listOpen = document.getElementById('channelOverlay').classList.contains('open');
@@ -628,7 +867,6 @@
 
         switch (keyCode) {
             case 38: // Arrow Up
-                // ئەگەر لەناو input بیت بە دوگمەی ئاڕاستەی سەرەوە مەپەڕێوە بۆ سەر elementـی تر
                 if (isWritingInInput) return;
                 
                 e.preventDefault();
@@ -660,7 +898,7 @@
 
             case 37: // Arrow Left
             case 39: // Arrow Right
-                if (isWritingInInput) return; // لە ناو input ڕێگە بدە بە فڵێشەکەن لە ناو دەقەکەدا بجوڵێت
+                if (isWritingInInput) return;
                 
                 if (focusableElements.length > 0) {
                     if (keyCode === 37) currentIndex = (currentIndex + 1) % focusableElements.length;
@@ -690,7 +928,6 @@
             case 461: // webOS Back
             case 8:   // Backspace
             case 27:  // Escape
-                // تەنها کاتێک پێویستە preventDefault بکەین کە لە ناو input نەبێت (چونکە لە تیڤی لیستی کەناڵەکان لادەبات)
                 if (!isWritingInInput) {
                     e.preventDefault();
                     if (listOpen) toggleChannelList(false);
@@ -700,6 +937,12 @@
 
             case 406: // Blue Button / LIST
                 if (isTvActive) toggleChannelList();
+                break;
+
+            case 403: // Red Button
+                if (isTvActive) {
+                    document.getElementById('btnTvLogout').click();
+                }
                 break;
         }
     });
