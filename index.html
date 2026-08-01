@@ -48,9 +48,7 @@
         .channel-item { padding: 12px 16px; background: #252525; border-radius: 6px; cursor: pointer; font-size: 15px; color: #ddd; border: 2px solid transparent; transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .channel-item.focusable:focus { background: #00adb5; color: #fff; border-color: #ffffff; outline: none; }
-        .channel-item.playing { border-right: 5px solid #00ff66; }
-        .fav-star { font-size: 17px; color: #555; cursor: pointer; flex-shrink: 0; }
-        .fav-star.active { color: #ffcc00; }
+        .channel-item.playing { border-right: 5px solid #00ff66; background: #1a3c40; }
 
         /* ============ ADMIN DASHBOARD SCREEN ============ */
         #adminScreen { height: 100vh; width: 100%; padding: 20px; flex-direction: column; overflow: hidden; }
@@ -113,7 +111,6 @@
             <div class="overlay-header">
                 <div class="filter-tabs">
                     <div class="tab focusable active" data-filter="all">هەمووی</div>
-                    <div class="tab focusable" data-filter="fav">★ دڵخوازەکان</div>
                 </div>
                 <button class="close-list-btn focusable" id="btnCloseList">داخستن ✕</button>
             </div>
@@ -176,8 +173,11 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzueMQDE_jmGYHuPquWabCZ4gypKS5-Z8Ccd-BnPGAJshzE_bH7WiEXHjz1Ubi8__Ll/exec";
     
-    // 🟢 لێرەدا لینکی کەناڵەکان ڕاستکراوەتەوە:
-    const m3uUrl = "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u.m3u";
+    // لینکەکان و Proxy بۆ تێپەڕاندنی کێشەی CORS
+    const rawM3uUrls = [
+        "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u",
+        "https://lehatkako904-droid.github.io/Atta_tv/ata-tv-all.m3u.m3u"
+    ];
 
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "admin123";
@@ -256,8 +256,8 @@
         }
 
         errBox.innerText = '';
-        loadChannelsIfNeeded();
         showScreen('tvScreen');
+        loadChannelsIfNeeded();
     };
 
     document.getElementById('adminLoginLink').onclick = function() {
@@ -342,36 +342,68 @@
     }
 
     /* ---------- Channels Setup ---------- */
-    function loadChannelsIfNeeded() {
+    async function loadChannelsIfNeeded() {
         if (channelsLoaded) return;
         if (!player) player = videojs('tv-player');
 
-        fetch(m3uUrl)
-            .then(res => res.text())
-            .then(data => {
-                const lines = data.split('\n');
-                let currentName = "";
-                channelsData = [];
+        const listContainer = document.getElementById('channelList');
+        listContainer.innerHTML = `<div style="padding: 15px; color: #00adb5;">لە حاڵەتی بارکردنی کەناڵەکان...</div>`;
 
-                lines.forEach(line => {
-                    line = line.trim();
-                    if (line.startsWith('#EXTINF:')) {
-                        currentName = line.split(',')[1] || "کەناڵ";
-                    } else if (line.startsWith('http')) {
-                        channelsData.push({ name: currentName, url: line });
-                    }
-                });
+        let fetchedData = null;
 
-                channelsLoaded = true;
-                renderChannelList();
-            })
-            .catch(err => console.error("کێشە لە خوێندنەوەی کەناڵەکان:", err));
+        for (let targetUrl of rawM3uUrls) {
+            try {
+                // بەکارهێنانی Proxy بۆ ڕێگریکردن لە کێشەی CORS
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                let res = await fetch(proxyUrl);
+                if (!res.ok) {
+                    res = await fetch(targetUrl);
+                }
+                if (res.ok) {
+                    fetchedData = await res.text();
+                    if (fetchedData && fetchedData.includes('#EXTINF')) break;
+                }
+            } catch (e) {
+                console.warn("تەقەلای ڕاکێشان سەرکەوتوو نەبوو بۆ:", targetUrl);
+            }
+        }
+
+        if (fetchedData) {
+            parseM3u(fetchedData);
+            channelsLoaded = true;
+            renderChannelList();
+            document.getElementById('channelOverlay').classList.add('open');
+        } else {
+            listContainer.innerHTML = `<div style="padding: 15px; color: #ff4d4d;">نەتوانرا لیستەکە باربکرێت! تکایە لە تەواوی لینکی M3U دڵنیا ببەوە.</div>`;
+        }
+    }
+
+    function parseM3u(data) {
+        const lines = data.split('\n');
+        let currentName = "";
+        channelsData = [];
+
+        lines.forEach(line => {
+            line = line.trim();
+            if (line.startsWith('#EXTINF:')) {
+                const parts = line.split(',');
+                currentName = parts.length > 1 ? parts.slice(1).join(',').trim() : "کەناڵ";
+            } else if (line.startsWith('http://') || line.startsWith('https://')) {
+                channelsData.push({ name: currentName || "کەناڵی بێ ناو", url: line });
+                currentName = "";
+            }
+        });
     }
 
     function renderChannelList() {
         const listContainer = document.getElementById('channelList');
+        if(channelsData.length === 0) {
+            listContainer.innerHTML = `<div style="padding: 15px; color: #aaa;">هیچ کەناڵێک لە لیستەکەدا نەدۆزرایەوە.</div>`;
+            return;
+        }
+
         listContainer.innerHTML = channelsData.map((c, idx) => `
-            <div class="channel-item focusable" tabindex="0" onclick="playChannelByIndex(${idx})">
+            <div class="channel-item focusable ${idx === currentPlayIndex ? 'playing' : ''}" tabindex="0" onclick="playChannelByIndex(${idx})">
                 <span class="channel-name">${c.name}</span>
             </div>
         `).join('');
@@ -381,8 +413,18 @@
     function playChannelByIndex(idx) {
         currentPlayIndex = idx;
         const ch = channelsData[idx];
+        
+        // نوێکردنەوەی ناوی کەناڵی ئێستا
+        const label = document.getElementById('nowPlayingLabel');
+        label.innerText = `ئێستا پەخش دەکرێت: ${ch.name}`;
+        label.classList.add('show');
+        setTimeout(() => label.classList.remove('show'), 4000);
+
+        // دەستپێکردنی پەخش لە ڕێگەی Video.js
         player.src({ src: ch.url, type: 'application/x-mpegURL' });
-        player.play();
+        player.play().catch(e => console.log("کێشەی پەخشکردنی کەناڵ:", e));
+
+        renderChannelList();
         document.getElementById('channelOverlay').classList.remove('open');
     }
 
@@ -394,14 +436,18 @@
         const activeScreen = document.querySelector('.screen.active');
         if (!activeScreen) return;
         focusableElements = Array.from(activeScreen.querySelectorAll('.focusable'));
-        if (focusableElements.length > 0) setFocus(0);
+        if (focusableElements.length > 0 && currentIndex < focusableElements.length) {
+            setFocus(currentIndex);
+        }
     }
 
     function setFocus(index) {
         if (index < 0) index = 0;
         if (index >= focusableElements.length) index = focusableElements.length - 1;
         currentIndex = index;
-        focusableElements[currentIndex].focus();
+        if(focusableElements[currentIndex]) {
+            focusableElements[currentIndex].focus();
+        }
     }
 
     document.addEventListener('keydown', function(e) {
