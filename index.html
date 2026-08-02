@@ -168,13 +168,6 @@
             border-radius: 6px; border: 2px solid var(--border-color); background: var(--bg-input);
             color: var(--text-color); font-size: 15px;
         }
-        
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0px 1000px var(--bg-input) inset !important;
-            -webkit-text-fill-color: var(--text-color) !important;
-        }
 
         .focusable:focus, .active-focus {
             border-color: var(--primary-color) !important;
@@ -197,7 +190,6 @@
         .login-error { color: #ff4d4d; font-size: 13px; margin-top: 10px; min-height: 16px; }
         .admin-link { margin-top: 18px; font-size: 12px; color: var(--text-sub); cursor: pointer; text-decoration: underline; }
 
-        /* Controls Panel for Settings */
         .settings-bar {
             display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
             max-height: 110px; overflow-y: auto; padding: 4px;
@@ -228,23 +220,6 @@
             padding: 10px 16px; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px); white-space: nowrap;
         }
 
-        /* User Player Theme Switcher Box */
-        .user-theme-floating {
-            position: absolute;
-            top: 70px;
-            left: 20px;
-            z-index: 25;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(4px);
-            max-width: 80vw;
-        }
-
         .tv-clock-fixed {
             position: absolute; top: 20px; right: 20px; z-index: 26;
             background: var(--clock-bg); color: var(--primary-color);
@@ -253,12 +228,17 @@
             pointer-events: none;
         }
 
+        /* Large Channel Label overlay displaying logo & name */
         .now-playing-label {
-            position: absolute; bottom: 70px; right: 20px; background: rgba(0, 0, 0, 0.7); color: var(--primary-color);
-            padding: 12px 22px; border-radius: 8px; font-size: 18px; font-weight: bold; z-index: 25; opacity: 0;
+            position: absolute; bottom: 70px; right: 20px; background: rgba(0, 0, 0, 0.85); color: var(--primary-color);
+            padding: 12px 22px; border-radius: 8px; font-size: 20px; font-weight: bold; z-index: 25; opacity: 0;
             transition: opacity 0.4s ease; pointer-events: none; border: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .now-playing-label.show { opacity: 1; }
+        .now-playing-label img {
+            width: 35px; height: 35px; object-fit: contain; border-radius: 4px;
+        }
 
         .channel-overlay {
             position: absolute; top: 0; right: 0; bottom: 0; width: 420px; max-width: 90%;
@@ -285,9 +265,13 @@
         .channel-item-row { display: flex; align-items: center; gap: 6px; width: 100%; }
 
         .channel-item {
-            flex: 1; padding: 12px 14px; background: var(--bg-input); border-radius: 6px; cursor: pointer;
+            flex: 1; padding: 10px 12px; background: var(--bg-input); border-radius: 6px; cursor: pointer;
             font-size: 14px; color: var(--text-color); border: 2px solid transparent; transition: all 0.2s ease;
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .channel-item .channel-info { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
+        .channel-item .channel-logo {
+            width: 28px; height: 28px; object-fit: contain; border-radius: 4px; background: rgba(255,255,255,0.05); flex-shrink: 0;
         }
         .channel-item .channel-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .channel-item.playing { border-right: 5px solid var(--primary-color); }
@@ -303,22 +287,10 @@
         .admin-topbar h1 { color: var(--primary-color); font-size: 18px; }
         
         .admin-theme-box {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
-        .admin-theme-box label {
-            font-size: 12px;
-            font-weight: bold;
-            color: var(--primary-color);
-            white-space: nowrap;
-        }
+        .admin-theme-box label { font-size: 12px; font-weight: bold; color: var(--primary-color); white-space: nowrap; }
 
         .logout-btn {
             background: var(--bg-input); color: var(--text-color); border: 2px solid transparent; border-radius: 6px;
@@ -410,24 +382,6 @@
             <div id="tvUiControls" class="tv-overlay-controls">
                 <div class="floating-controls">
                     <button class="float-btn focusable" id="btnToggleList">☰ لیستی کەناڵەکان</button>
-                </div>
-
-                <!-- User Player Theme Panel -->
-                <div class="user-theme-floating">
-                    <span style="font-size:12px; color:var(--primary-color); font-weight:bold;">🎨 سیم:</span>
-                    <div class="settings-bar" style="margin-bottom: 0;">
-                        <button class="mode-btn focusable" onclick="toggleDarkMode()">☀️/🌙</button>
-                        <button class="theme-btn focusable" onclick="setTheme('default')">شین</button>
-                        <button class="theme-btn focusable" onclick="setTheme('netflix')">ڕەش</button>
-                        <button class="theme-btn focusable" onclick="setTheme('purple')">وەنەوشەیی</button>
-                        <button class="theme-btn focusable" onclick="setTheme('matrix')">نێئۆن</button>
-                        <button class="theme-btn focusable" onclick="setTheme('gold')">زێڕین</button>
-                        <button class="theme-btn focusable" onclick="setTheme('crimson')">سوور</button>
-                        <button class="theme-btn focusable" onclick="setTheme('sunset')">پرتەقاڵی</button>
-                        <button class="theme-btn focusable" onclick="setTheme('yellow')">زەرد</button>
-                        <button class="theme-btn focusable" onclick="setTheme('emerald')">زومرود</button>
-                        <button class="theme-btn focusable" onclick="setTheme('royal')">پاشایی</button>
-                    </div>
                 </div>
 
                 <button class="float-btn focusable" id="btnTvLogout" style="position:absolute; bottom:20px; left:20px; z-index:25;">چوونەدەرەوە</button>
@@ -527,6 +481,8 @@
         "https://raw.githubusercontent.com/lehatkako904-droid/Atta_tv/main/ata-tv-all.m3u"
     ];
 
+    const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='%2300adb5'><path d='M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z'/></svg>";
+
     const ADMIN_USER = "admin";
     const ADMIN_PASS = "admin123";
 
@@ -541,7 +497,7 @@
     let channelsLoaded = false;
     let nowPlayingTimeout = null;
 
-    /* ---------- Theme & Dark Mode System ---------- */
+    /* ---------- Theme System ---------- */
     function setTheme(themeName) {
         if (themeName === 'default') {
             document.documentElement.removeAttribute('data-theme');
@@ -772,7 +728,7 @@
         refreshFocusableList();
     }
 
-    /* ---------- Channels Fetcher ---------- */
+    /* ---------- Channels Fetcher with Logo Parsing ---------- */
     async function fetchM3uContent(targetUrl) {
         const proxies = [
             (url) => url,
@@ -795,14 +751,25 @@
     function parseM3u(data) {
         const lines = data.split('\n');
         let currentName = "";
+        let currentLogo = "";
         channelsData = [];
 
         lines.forEach(line => {
             line = line.trim();
             if (line.startsWith('#EXTINF:')) {
+                // Extract Channel Name
                 currentName = line.split(',')[1] || "کەناڵی بێ ناو";
+                
+                // Extract tvg-logo if available
+                const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
+                if (logoMatch && logoMatch[1]) {
+                    currentLogo = logoMatch[1];
+                } else {
+                    currentLogo = DEFAULT_LOGO;
+                }
             } else if (line.startsWith('http')) {
-                channelsData.push({ name: currentName, url: line });
+                channelsData.push({ name: currentName, logo: currentLogo, url: line });
+                currentLogo = DEFAULT_LOGO; // reset logo
             }
         });
     }
@@ -859,7 +826,10 @@
         listContainer.innerHTML = channelsData.map((c, idx) => `
             <div class="channel-item-row">
                 <div class="channel-item focusable" tabindex="0" data-idx="${idx}" onclick="playChannelByIndex(${idx}); toggleChannelList(false);">
-                    <span class="channel-name">${idx + 1}. ${c.name}</span>
+                    <div class="channel-info">
+                        <img class="channel-logo" src="${c.logo}" onerror="this.src='${DEFAULT_LOGO}'" alt="logo" />
+                        <span class="channel-name">${idx + 1}. ${c.name}</span>
+                    </div>
                 </div>
                 <button class="move-btn focusable" title="سەرەوە" onclick="moveChannel(${idx}, -1)">▲</button>
                 <button class="move-btn focusable" title="خوارەوە" onclick="moveChannel(${idx}, 1)">▼</button>
@@ -879,19 +849,27 @@
 
         player.src({ src: ch.url, type: 'application/x-mpegURL' });
         player.play().catch(e => console.log("Play interrupted"));
-        showNowPlaying(`${idx + 1}. ${ch.name}`);
+        showNowPlaying(`${idx + 1}. ${ch.name}`, ch.logo);
 
         document.querySelectorAll('.channel-item').forEach((el, i) => {
             el.classList.toggle('playing', i === idx);
         });
     }
 
-    function showNowPlaying(name) {
+    /* Display Channel info for 8 Seconds */
+    function showNowPlaying(name, logo) {
         const label = document.getElementById('nowPlayingLabel');
-        label.innerText = name;
+        const logoUrl = logo || DEFAULT_LOGO;
+
+        label.innerHTML = `
+            <img src="${logoUrl}" onerror="this.src='${DEFAULT_LOGO}'" alt="logo" />
+            <span>${name}</span>
+        `;
         label.classList.add('show');
         clearTimeout(nowPlayingTimeout);
-        nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 3000);
+
+        // Keep label on screen for 8 seconds
+        nowPlayingTimeout = setTimeout(() => label.classList.remove('show'), 8000);
     }
 
     function toggleChannelList(forceState) {
@@ -911,7 +889,7 @@
             const listOpen = document.getElementById('channelOverlay').classList.contains('open');
             focusableElements = listOpen
                 ? Array.from(document.querySelectorAll('#channelOverlay .focusable'))
-                : Array.from(document.querySelectorAll('#tvUiControls .focusable'));
+                : Array.from(document.querySelectorAll('.floating-controls .focusable, #btnTvLogout'));
         } else {
             const activeScreen = document.querySelector('.screen.active');
             if (!activeScreen) return;
@@ -947,7 +925,7 @@
                 if (isWritingInInput) return;
                 
                 e.preventDefault();
-                if (isTvActive && !listOpen && (!activeEl || !activeEl.classList.contains('theme-btn') && !activeEl.classList.contains('mode-btn'))) {
+                if (isTvActive && !listOpen) {
                     playChannelByIndex(currentPlayIndex - 1);
                 } else if (listOpen && e.shiftKey && activeEl.classList.contains('channel-item')) {
                     let idx = parseInt(activeEl.getAttribute('data-idx'));
@@ -962,7 +940,7 @@
                 if (isWritingInInput) return;
 
                 e.preventDefault();
-                if (isTvActive && !listOpen && (!activeEl || !activeEl.classList.contains('theme-btn') && !activeEl.classList.contains('mode-btn'))) {
+                if (isTvActive && !listOpen) {
                     playChannelByIndex(currentPlayIndex + 1);
                 } else if (listOpen && e.shiftKey && activeEl.classList.contains('channel-item')) {
                     let idx = parseInt(activeEl.getAttribute('data-idx'));
